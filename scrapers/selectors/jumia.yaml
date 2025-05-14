@@ -1,0 +1,78 @@
+# selectors/jumia.yaml
+phones-tablets:
+  url: "https://www.jumia.com.gh/phones-tablets/"
+  item:  article.c-prd               # your <article class="c-prd …">
+  link:  a.core                      # wrapper link
+  img:   a.core img.img              # the <img class="img"> inside it
+
+  # NEW for the updated layout:
+  title: a.core div.info h3.name     # <h3 class="name">
+  price: a.core div.info div.prc     # <div class="prc">             # lazy-loaded images live on data-src
+
+home-office:
+  url: "https://www.jumia.com.gh/home-office/"
+  item:  article.c-prd               # your <article class="c-prd …">
+  link:  a.core                      # wrapper link
+  img:   a.core img.img              # the <img class="img"> inside it
+
+  # NEW for the updated layout:
+  title: a.core div.info h3.name     # <h3 class="name">
+  price: a.core div.info div.prc     # <div class="prc">
+
+electronics:
+  url: "https://www.jumia.com.gh/electronics/"
+  item:  article.c-prd               # your <article class="c-prd …">
+  link:  a.core                      # wrapper link
+  img:   a.core img.img              # the <img class="img"> inside it
+
+  # NEW for the updated layout:
+  title: a.core div.info h3.name     # <h3 class="name">
+  price: a.core div.info div.prc     # <div class="prc">        # lazy-loaded images live on data-src
+
+# … repeat for every category …
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# phones-tablets:
+#   url: "https://www.jumia.com.gh/phones-tablets/?page=1#catalog-listing"
+
+#   # product card
+#   item:   "article.prd"
+
+#   # title inside the product
+#   title:  "div.name"
+
+#   # price inside the product
+#   price:  "div.prc"
+
+#   # product detail page link
+#   link:   "a.core"
+
+#   # image URL (lazy-loaded)
+#   img:    "img.img"
+
+
+
+
+
+

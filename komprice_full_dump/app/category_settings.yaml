@@ -1,0 +1,3 @@
+- site: JUMIA
+  category: phones-tablets
+  cron: "0 */3 * * *"

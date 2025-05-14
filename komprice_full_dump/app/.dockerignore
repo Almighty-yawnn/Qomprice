@@ -1,0 +1,7 @@
+# Ignore the React front-end and heavy folders
+web/
+**/node_modules
+.git
+.vscode
+.DS_Store
+*.log

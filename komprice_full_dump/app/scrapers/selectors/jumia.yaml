@@ -1,0 +1,24 @@
+phones-tablets:
+  url: "https://www.jumia.com.gh/phones-tablets/?page=1#catalog-listing"
+
+
+
+  item:    "article.prd"
+  title:   "article.prd h3.name"
+  price:   "article.prd div.prc"
+  link:    "article.prd a[href]"
+  img:     "article.prd img[data-src], article[class*='c-prd'] img[src]"
+
+
+# phones-tablets:
+#   url: "https://www.jumia.com.gh/phones-tablets/?page=1#catalog-listing"
+
+#   item:    "article.prd_fb_span"  # or you can try just 'article[class*="c-prd"]'
+#   title:   "article.prd_fb_span h3.name"
+#   price:   "article.prd_fb_span div.prc"
+#   link:    "article.prd_fb_span a[href]"
+#   img:     "article.prd_fb_span img[data-src], article.prd_fb_span img[src]"
+
+
+
+

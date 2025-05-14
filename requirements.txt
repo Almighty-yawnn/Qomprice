@@ -1,0 +1,11 @@
+fastapi
+uvicorn[standard]
+SQLAlchemy>=2.0
+asyncpg
+databases[postgresql]
+python-dotenv
+PyYAML
+playwright
+redis
+rq
+pydantic
