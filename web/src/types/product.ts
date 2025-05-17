@@ -12,6 +12,14 @@ export interface VendorListing {
 }
 
 export interface Product {
+  category: string;
+  name: any;
+  description: any;
+  price: number;
+  inStock: boolean;
+  onSale: boolean;
+  brand: any;
+  seller: any;
   id: string;
   title: string;
   listings: VendorListing[];

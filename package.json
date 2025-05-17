@@ -1,5 +1,13 @@
 {
   "dependencies": {
-    "@heroicons/react": "^2.2.0"
+    "@heroicons/react": "^2.2.0",
+    "@radix-ui/react-slot": "^1.2.2",
+    "@tailwindcss/vite": "^4.1.6",
+    "tailwindcss": "^4.1.6"
+  },
+  "devDependencies": {
+    "stylelint": "^16.19.1",
+    "stylelint-config-standard": "^38.0.0",
+    "stylelint-config-tailwindcss": "^1.0.0"
   }
 }
