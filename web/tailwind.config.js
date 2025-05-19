@@ -43,7 +43,7 @@ module.exports = {
       },
       backgroundSize: { // Necessary for backgroundPosition animation to be visible
         '300%': '300% 300%', // A larger background size that can be moved
-      }
+      },
       fontFamily: {
         sans: ['var(--font-sora)', ...defaultTheme.fontFamily.sans],
       },
@@ -70,6 +70,5 @@ module.exports = {
     require('@tailwindcss/typography'),
     require('@tailwindcss/typography'),
   ],
-};
-
-  
+}
+}
