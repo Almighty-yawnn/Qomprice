@@ -11,3 +11,14 @@
   --background: 0 0 0;       /* black */
   --foreground: 255 255 255; /* white */
 }
+
+body {
+  font-family: var(--font-sora), sans-serif; /* Set Sora as the default body font */
+  /* Other global styles */
+}
+
+/* You can also define styles for headings if you want them to use Sora
+   or a different font by default */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-sora), sans-serif; /* Or another font variable if you defined one */
+}

@@ -9,6 +9,7 @@ export interface VendorListing {
   image_url: string;
   stock_status: boolean;
   scraped_at?: string;
+   categorySlug: string;
 }
 
 export interface Product {

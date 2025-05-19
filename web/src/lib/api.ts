@@ -1,11 +1,13 @@
 import type { Product } from "@/types/product";
 
+
 export const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 export async function fetchCategories() {
   const res = await fetch(`${API}/categories`, { next: { revalidate: 60 } });
   return res.json() as Promise<{ slug: string }[]>;
 }
+
 
 export async function searchProducts(params: {
   q?: string;
