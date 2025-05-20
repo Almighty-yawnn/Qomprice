@@ -1,5 +1,5 @@
 /* ----------------------------------------------------------------
- * Komprice – Home page with App Loader, Live Search & Dynamic Header
+ * Komprice – Home page with App Loader, Live Search, Dynamic Header, Scroll-to-Top
  * ----------------------------------------------------------------*/
 "use client";
 
@@ -18,6 +18,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronDownIcon,
+  ArrowUpIcon, // For Scroll-to-Top button
 } from "@heroicons/react/24/outline";
 
 // Define a type for category data
@@ -44,7 +45,8 @@ const MOCK_CATEGORIES: Category[] = [
 const POPULAR_CATEGORIES_SLUGS = ["", "phones-tablets", "laptops", "electronics"];
 const PRODUCTS_PER_PAGE = 30;
 const currentYear = new Date().getFullYear();
-const SCROLL_THRESHOLD = 50; // Pixels to scroll before header shrinks
+const HEADER_SCROLL_THRESHOLD = 50; // Pixels to scroll before header shrinks
+const SCROLL_TO_TOP_THRESHOLD = 300; // Pixels to scroll before "scroll to top" button appears
 const DEBOUNCE_DELAY = 400; // milliseconds for search debounce
 
 // --- Simulate API with Pagination Support ---
@@ -63,23 +65,23 @@ const searchProducts = async ({ q, category, limit, page }: { q: string; categor
 
 
 export default function Home() {
+  const [isLoadingApp, setIsLoadingApp] = useState(true);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [showScrollToTopButton, setShowScrollToTopButton] = useState(false);
+
   const router = useRouter();
   const params = useSearchParams();
 
-  // Memoized initial values from URL to avoid re-evaluating on every render
   const initialQueryFromUrl = useMemo(() => params.get("q") ?? "", [params]);
   const initialCategoryFromUrl = useMemo(() => params.get("category") ?? "", [params]);
   const initialPageFromUrl = useMemo(() => Math.max(1, parseInt(params.get("page") ?? "1", 10)), [params]);
-
-  const [isLoadingApp, setIsLoadingApp] = useState(true);
-  const [isScrolled, setIsScrolled] = useState(false);
 
   const [searchInput, setSearchInput] = useState(initialQueryFromUrl);
   const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(initialQueryFromUrl);
 
   const [products, setProducts] = useState<Product[]>([]);
   const [totalProducts, setTotalProducts] = useState(0);
-  const [loading, setLoading] = useState(false); // For product fetching
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const [selectedCategorySlug, setSelectedCategorySlug] = useState(initialCategoryFromUrl);
@@ -87,7 +89,7 @@ export default function Home() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
 
-  const currentPage = initialPageFromUrl; // Current page is always derived from URL params
+  const currentPage = initialPageFromUrl;
 
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
@@ -102,9 +104,13 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, []);
 
-  // Effect for Header Scroll Detection
+  // Effect for Scroll Detection (Header shrink & Scroll-to-top button)
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > SCROLL_THRESHOLD);
+    const handleScroll = () => {
+      const currentScrollY = window.scrollY;
+      setIsScrolled(currentScrollY > HEADER_SCROLL_THRESHOLD);
+      setShowScrollToTopButton(currentScrollY > SCROLL_TO_TOP_THRESHOLD);
+    };
     window.addEventListener("scroll", handleScroll);
     handleScroll(); // Initial check
     return () => window.removeEventListener("scroll", handleScroll);
@@ -132,12 +138,10 @@ export default function Home() {
     const currentQ = params.get("q") ?? "";
     const currentCategory = params.get("category") ?? "";
 
-    // Only proceed if debounced term or category has actually changed from what's in URL
     if (debouncedSearchTerm !== currentQ || selectedCategorySlug !== currentCategory) {
       const newParams = new URLSearchParams();
       if (debouncedSearchTerm) newParams.set("q", debouncedSearchTerm);
       if (selectedCategorySlug) newParams.set("category", selectedCategorySlug);
-      // Page is implicitly reset to 1 by not including 'page' in newParams
       router.replace(`/?${newParams.toString()}`, { scroll: false });
     }
   }, [debouncedSearchTerm, selectedCategorySlug, router, params]);
@@ -145,7 +149,6 @@ export default function Home() {
   // Effect for Fetching Products
   useEffect(() => {
     if (isLoadingApp) return;
-
     const fetchProductsData = async () => {
       setLoading(true);
       setError(null);
@@ -168,10 +171,9 @@ export default function Home() {
     fetchProductsData();
   }, [debouncedSearchTerm, selectedCategorySlug, currentPage, isLoadingApp]);
 
-  // Effect to sync local input states with URL parameters (e.g., on back/forward navigation)
+  // Effect to sync local input states with URL parameters
    useEffect(() => {
     setSearchInput(initialQueryFromUrl);
-    // setDebouncedSearchTerm(initialQueryFromUrl); // Let the debounce effect handle this from searchInput
     setSelectedCategorySlug(initialCategoryFromUrl);
   }, [initialQueryFromUrl, initialCategoryFromUrl]);
 
@@ -194,29 +196,30 @@ export default function Home() {
 
   const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setDebouncedSearchTerm(searchInput); // Immediately update debounced term
+    setDebouncedSearchTerm(searchInput);
     const newParams = new URLSearchParams();
     if (searchInput) newParams.set("q", searchInput);
     if (selectedCategorySlug) newParams.set("category", selectedCategorySlug);
-    // Page will be reset as it's not in newParams
-    router.push(`/?${newParams.toString()}`); // Use push for explicit submit
+    router.push(`/?${newParams.toString()}`);
   };
 
   const handleCategorySelect = (slug: string) => {
     setSelectedCategorySlug(slug);
-    // The useEffect listening to selectedCategorySlug will handle URL update and trigger re-fetch.
     setIsCategoryModalOpen(false);
   };
 
   const handlePageChange = (page: number) => {
       const calculatedTotalPages = Math.max(1, Math.ceil(totalProducts / PRODUCTS_PER_PAGE));
       if (page < 1 || (page > calculatedTotalPages && page !== 1)) return;
-
       const newParams = new URLSearchParams();
       if (debouncedSearchTerm) newParams.set("q", debouncedSearchTerm);
       if (selectedCategorySlug) newParams.set("category", selectedCategorySlug);
       newParams.set("page", page.toString());
       router.push(`/?${newParams.toString()}`);
+  };
+
+  const scrollToTop = () => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // --- Pagination Calculation ---
@@ -228,7 +231,7 @@ export default function Home() {
     const pageNumbers: (number | string)[] = [];
     const maxPagesToShow = 5;
     const halfMaxPages = Math.floor(maxPagesToShow / 2);
-    if (totalPages <= 1) return []; // No page numbers if only one page or less
+    if (totalPages <= 1) return [];
 
     if (totalPages <= maxPagesToShow + 2) {
       for (let i = 1; i <= totalPages; i++) pageNumbers.push(i);
@@ -243,11 +246,10 @@ export default function Home() {
       if (endPage < totalPages - 1) pageNumbers.push('...');
       pageNumbers.push(totalPages);
     }
-    // Simplified filter for consecutive ellipses or redundant ones next to 1 or totalPages
     return pageNumbers.filter((item, index, self) => {
         if (item === '...') {
-            if (self[index - 1] === '...') return false; // remove consecutive ...
-            if (typeof self[index - 1] === 'number' && typeof self[index + 1] === 'number' && (self[index + 1] as number) === (self[index - 1] as number) + 1) return false; // remove ... between consecutive numbers
+            if (self[index - 1] === '...') return false;
+            if (typeof self[index - 1] === 'number' && typeof self[index + 1] === 'number' && (self[index + 1] as number) === (self[index - 1] as number) + 1) return false;
         }
         return true;
     });
@@ -271,34 +273,17 @@ export default function Home() {
         `}
       >
         {/* Top bar */}
-        <div
-          className={`flex items-center justify-between px-4 sm:px-6 max-w-7xl mx-auto transition-all duration-300 ease-in-out ${
-            isScrolled ? 'py-2.5' : 'py-4'
-          }`}
-        >
-          <h1
-            className={`font-bold tracking-tight transition-all duration-300 ease-in-out ${
-              isScrolled ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'
-            }`}
-          >
+        <div className={`flex items-center justify-between px-4 sm:px-6 max-w-7xl mx-auto transition-all duration-300 ease-in-out ${isScrolled ? 'py-2.5' : 'py-4'}`}>
+          <h1 className={`font-bold tracking-tight transition-all duration-300 ease-in-out ${isScrolled ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>
             <Link href="/" className="hover:text-white">Komprice</Link>
           </h1>
-          <nav
-            className={`hidden md:flex transition-all duration-300 ease-in-out ${
-              isScrolled ? 'gap-6 text-xs sm:text-sm' : 'gap-8 text-sm'
-            }`}
-          >
+          <nav className={`hidden md:flex transition-all duration-300 ease-in-out ${isScrolled ? 'gap-6 text-xs sm:text-sm' : 'gap-8 text-sm'}`}>
             <Link href="/compare" className="hover:underline hover:text-white">Compare</Link>
             <Link href="/about" className="hover:underline hover:text-white">About</Link>
           </nav>
         </div>
-
         {/* Search bar area */}
-        <div
-          className={`px-4 sm:px-6 mx-auto transition-all duration-300 ease-in-out ${
-            isScrolled ? 'pb-3 max-w-3xl' : 'pb-8 max-w-4xl'
-          }`}
-        >
+        <div className={`px-4 sm:px-6 mx-auto transition-all duration-300 ease-in-out ${isScrolled ? 'pb-3 max-w-3xl' : 'pb-8 max-w-4xl'}`}>
           <form onSubmit={handleSearchSubmit} className="flex items-center relative">
             <input
               type="text"
@@ -306,55 +291,25 @@ export default function Home() {
               value={searchInput}
               onChange={handleInputChange}
               placeholder={isScrolled ? "Search..." : "Search for products, deals, or stores..."}
-              className={`w-full border rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all duration-300 ease-in-out placeholder-gray-500 text-gray-900 border-gray-300 ${
-                isScrolled ? 'pl-3 pr-12 py-2 text-sm' : 'pl-4 pr-16 py-3 text-base'
-              }`}
+              className={`w-full border rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all duration-300 ease-in-out placeholder-gray-500 text-gray-900 border-gray-300 ${isScrolled ? 'pl-3 pr-12 py-2 text-sm' : 'pl-4 pr-16 py-3 text-base'}`}
             />
             <button
               type="submit"
-              className={`absolute right-0 top-1/2 transform -translate-y-1/2 bg-yellow-400 hover:bg-yellow-500 text-emerald-900 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${
-                isScrolled ? 'h-8 w-8 sm:h-9 sm:w-9 hover:scale-105' : 'h-10 w-10 sm:h-12 sm:w-12 hover:scale-110'
-              }`}
+              className={`absolute right-0 top-1/2 transform -translate-y-1/2 bg-yellow-400 hover:bg-yellow-500 text-emerald-900 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${isScrolled ? 'h-8 w-8 sm:h-9 sm:w-9 hover:scale-105' : 'h-10 w-10 sm:h-12 sm:w-12 hover:scale-110'}`}
               aria-label="Search"
             >
-                <MagnifyingGlassIcon
-                  className={`transition-all duration-300 ease-in-out stroke-[2.5] ${
-                    isScrolled ? 'h-4 w-4 sm:h-5 sm:w-5' : 'h-5 w-5 sm:h-6 sm:w-6'
-                  }`}
-                />
+              <MagnifyingGlassIcon className={`transition-all duration-300 ease-in-out stroke-[2.5] ${isScrolled ? 'h-4 w-4 sm:h-5 sm:w-5' : 'h-5 w-5 sm:h-6 sm:w-6'}`} />
             </button>
           </form>
-          <div
-            className={`flex flex-wrap justify-center transition-all duration-300 ease-in-out ${
-              isScrolled ? 'gap-1.5 sm:gap-2 mt-2.5' : 'gap-2 mt-6'
-            }`}
-          >
+          <div className={`flex flex-wrap justify-center transition-all duration-300 ease-in-out ${isScrolled ? 'gap-1.5 sm:gap-2 mt-2.5' : 'gap-2 mt-6'}`}>
             {popularCategories.map((cat) => (
-              <button
-                key={cat.slug}
-                onClick={() => handleCategorySelect(cat.slug)}
-                className={`font-medium rounded-full transition-all duration-300 ease-in-out ${
-                  selectedCategorySlug === cat.slug ? "bg-amber-300 text-amber-900 shadow-sm" : "bg-amber-100 text-amber-700 hover:bg-amber-200"
-                } ${isScrolled ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-xs sm:text-sm'}`}
-              >
+              <button key={cat.slug} onClick={() => handleCategorySelect(cat.slug)} className={`font-medium rounded-full transition-all duration-300 ease-in-out ${selectedCategorySlug === cat.slug ? "bg-amber-300 text-amber-900 shadow-sm" : "bg-amber-100 text-amber-700 hover:bg-amber-200"} ${isScrolled ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-xs sm:text-sm'}`}>
                 {cat.label}
               </button>
             ))}
-            <button
-              type="button"
-              ref={moreButtonRef}
-              onClick={() => setIsCategoryModalOpen(true)}
-              className={`font-medium rounded-full transition-all duration-300 ease-in-out flex items-center gap-1 bg-amber-100 text-amber-700 hover:bg-amber-200 ${
-                isScrolled ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-xs sm:text-sm'
-              }`}
-              aria-label="More categories"
-            >
+            <button type="button" ref={moreButtonRef} onClick={() => setIsCategoryModalOpen(true)} className={`font-medium rounded-full transition-all duration-300 ease-in-out flex items-center gap-1 bg-amber-100 text-amber-700 hover:bg-amber-200 ${isScrolled ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-xs sm:text-sm'}`} aria-label="More categories">
               <span>More</span>
-              <ChevronDownIcon
-                className={`transition-all duration-300 ease-in-out stroke-[2.5] text-amber-600 ${
-                  isScrolled ? 'h-3 w-3' : 'h-3 w-3 sm:h-4 sm:w-4'
-                }`}
-              />
+              <ChevronDownIcon className={`transition-all duration-300 ease-in-out stroke-[2.5] text-amber-600 ${isScrolled ? 'h-3 w-3' : 'h-3 w-3 sm:h-4 sm:w-4'}`} />
             </button>
           </div>
         </div>
@@ -362,110 +317,72 @@ export default function Home() {
 
       {/* ====== MAIN CONTENT AREA ====== */}
       <div className="flex-grow">
-        {/* Category Modal */}
         {isCategoryModalOpen && (
-          <div
-            className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-6"
-            aria-modal="true"
-            role="dialog"
-            aria-labelledby="categories-modal-title"
-          >
-            <div
-              className="absolute inset-0 bg-black/60 transition-opacity duration-300 ease-in-out"
-              aria-hidden="true"
-              onClick={() => setIsCategoryModalOpen(false)}
-            />
-            <div
-              ref={modalContentRef}
-              className="relative bg-white rounded-lg shadow-xl max-w-sm w-full max-h-[90vh] overflow-y-auto p-6 transform transition-transform duration-300 ease-in-out"
-            >
+          <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-6" aria-modal="true" role="dialog" aria-labelledby="categories-modal-title">
+            <div className="absolute inset-0 bg-black/60 transition-opacity duration-300 ease-in-out" aria-hidden="true" onClick={() => setIsCategoryModalOpen(false)} />
+            <div ref={modalContentRef} className="relative bg-white rounded-lg shadow-xl max-w-sm w-full max-h-[90vh] overflow-y-auto p-6 transform transition-transform duration-300 ease-in-out">
               <div className="flex items-center justify-between mb-6 border-b pb-4">
                 <h2 id="categories-modal-title" className="text-xl font-bold text-gray-800">All Categories</h2>
-                <button onClick={() => setIsCategoryModalOpen(false)} aria-label="Close categories modal" className="p-1 rounded-md hover:bg-gray-100 transition-colors">
-                  <XMarkIcon className="w-6 h-6 text-gray-600" />
-                </button>
+                <button onClick={() => setIsCategoryModalOpen(false)} aria-label="Close categories modal" className="p-1 rounded-md hover:bg-gray-100 transition-colors"><XMarkIcon className="w-6 h-6 text-gray-600" /></button>
               </div>
-              {categoriesLoading ? (
-                <div className="flex justify-center py-8"><ArrowPathIcon className="h-8 w-8 animate-spin text-gray-400" /></div>
-              ) : (
+              {categoriesLoading ? (<div className="flex justify-center py-8"><ArrowPathIcon className="h-8 w-8 animate-spin text-gray-400" /></div>) : (
                 <ul className="space-y-2">
-                  {categories.map((cat) => (
-                    <li key={cat.slug}>
-                      <button onClick={() => handleCategorySelect(cat.slug)} className={`block w-full text-left px-3 py-2 rounded-md transition-colors duration-200 ${selectedCategorySlug === cat.slug ? "bg-emerald-100 text-emerald-700 font-semibold" : "text-gray-700 hover:bg-gray-100"}`}>
-                        {cat.label}
-                      </button>
-                    </li>
-                  ))}
+                  {categories.map((cat) => (<li key={cat.slug}><button onClick={() => handleCategorySelect(cat.slug)} className={`block w-full text-left px-3 py-2 rounded-md transition-colors duration-200 ${selectedCategorySlug === cat.slug ? "bg-emerald-100 text-emerald-700 font-semibold" : "text-gray-700 hover:bg-gray-100"}`}>{cat.label}</button></li>))}
                 </ul>
               )}
             </div>
           </div>
         )}
-
-        {/* Product Grid Section */}
         <section className="px-4 sm:px-6 py-12 max-w-7xl mx-auto">
           {loading && <div className="flex justify-center py-16"><ArrowPathIcon className="h-10 w-10 animate-spin text-emerald-500" /></div>}
-          {!loading && error && (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md mx-auto" role="alert">
-              <strong className="font-bold">Error!</strong> <span className="block sm:inline">{error}</span>
-            </div>
-          )}
+          {!loading && error && (<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md mx-auto" role="alert"><strong className="font-bold">Error!</strong> <span className="block sm:inline">{error}</span></div>)}
           {!loading && !error && products.length === 0 && totalProducts === 0 && !debouncedSearchTerm && !selectedCategorySlug && (
-            <div className="text-center py-16">
-              <p className="text-xl text-gray-600 mb-4">Welcome to Komprice!</p>
-              <p className="text-gray-500 text-sm">Use the search bar or categories to find products.</p>
-            </div>
+            <div className="text-center py-16"><p className="text-xl text-gray-600 mb-4">Welcome to Komprice!</p><p className="text-gray-500 text-sm">Use the search bar or categories to find products.</p></div>
           )}
           {!loading && !error && products.length === 0 && (debouncedSearchTerm || selectedCategorySlug) && (
-            <div className="text-center py-16">
-              <p className="text-xl text-gray-600 mb-4">No products found for your search.</p>
-              <p className="text-gray-500 text-sm">Try a different search term or category.</p>
-            </div>
+            <div className="text-center py-16"><p className="text-xl text-gray-600 mb-4">No products found for your search.</p><p className="text-gray-500 text-sm">Try a different search term or category.</p></div>
           )}
           {!loading && !error && products.length > 0 && (
             <>
-               <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
-                 {products.map((p, i) => {
-                   if (!p || typeof p.id === 'undefined') {
-                     console.warn(`Product at index ${i} is invalid or missing an id`, p);
-                     return (<div className="bg-yellow-50 text-yellow-700 text-sm p-3 rounded shadow-sm" key={`invalid-${i}`}>Data issue</div>);
-                   }
-                   return <ProductCard key={p.id || `product-${i}-${p.name}`} product={p} />; // Added p.name for a more unique fallback key
-                 })}
-               </div>
-
-               {totalProducts > 0 && totalPages > 1 && (
-                   <div className="mt-10 text-center">
-                       <div className="flex justify-center items-center space-x-2 mb-3">
-                           <button onClick={() => handlePageChange(currentPage - 1)} disabled={isFirstPage || loading} className={`p-2 border rounded-md text-sm font-medium flex items-center justify-center ${isFirstPage || loading ? "text-gray-400 border-gray-200 cursor-not-allowed" : "border-gray-300 text-gray-700 hover:bg-gray-50"}`} aria-label="Previous page">
-                               <ChevronLeftIcon className="h-5 w-5" /> <span className="hidden sm:inline ml-1">Prev</span>
-                           </button>
-                           <button onClick={() => handlePageChange(currentPage + 1)} disabled={isLastPage || loading} className={`p-2 border rounded-md text-sm font-medium flex items-center justify-center ${isLastPage || loading ? "text-gray-400 border-gray-200 cursor-not-allowed" : "border-gray-300 text-gray-700 hover:bg-gray-50"}`} aria-label="Next page">
-                               <span className="hidden sm:inline mr-1">Next</span> <ChevronRightIcon className="h-5 w-5" />
-                           </button>
-                       </div>
-                       <div className="flex justify-center items-center space-x-1 mt-2">
-                           {generatePageNumbers().map((page, index) =>
-                               typeof page === 'number' ? (
-                                   <button key={`page-${page}`} onClick={() => handlePageChange(page)} disabled={page === currentPage || loading} className={`min-w-[36px] h-9 px-2 py-1 border rounded-md text-sm font-medium flex items-center justify-center transition-colors duration-150 ${page === currentPage ? "bg-emerald-600 text-white border-emerald-600 cursor-default" : loading ? "text-gray-400 border-gray-200 cursor-not-allowed" : "border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400"}`} aria-current={page === currentPage ? "page" : undefined}>
-                                       {page}
-                                   </button>
-                               ) : (<span key={`ellipsis-${index}`} className="px-2 py-1 text-gray-500 text-sm flex items-center justify-center h-9">...</span>)
-                           )}
-                       </div>
-                       <div className="text-gray-600 text-xs mt-3">Page {currentPage} of {totalPages}</div>
-                   </div>
-               )}
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6">
+                {products.map((p, i) => {
+                  if (!p || typeof p.id === 'undefined') { console.warn(`Product at index ${i} is invalid`, p); return (<div className="bg-yellow-50 text-yellow-700 text-sm p-3 rounded shadow-sm" key={`invalid-${i}`}>Data issue</div>); }
+                  return <ProductCard key={p.id || `product-${i}-${p.name}`} product={p} />;
+                })}
+              </div>
+              {totalProducts > 0 && totalPages > 1 && (
+                <div className="mt-10 text-center">
+                  <div className="flex justify-center items-center space-x-2 mb-3">
+                    <button onClick={() => handlePageChange(currentPage - 1)} disabled={isFirstPage || loading} className={`p-2 border rounded-md text-sm font-medium flex items-center justify-center ${isFirstPage || loading ? "text-gray-400 border-gray-200 cursor-not-allowed" : "border-gray-300 text-gray-700 hover:bg-gray-50"}`} aria-label="Previous page"><ChevronLeftIcon className="h-5 w-5" /> <span className="hidden sm:inline ml-1">Prev</span></button>
+                    <button onClick={() => handlePageChange(currentPage + 1)} disabled={isLastPage || loading} className={`p-2 border rounded-md text-sm font-medium flex items-center justify-center ${isLastPage || loading ? "text-gray-400 border-gray-200 cursor-not-allowed" : "border-gray-300 text-gray-700 hover:bg-gray-50"}`} aria-label="Next page"><span className="hidden sm:inline mr-1">Next</span> <ChevronRightIcon className="h-5 w-5" /></button>
+                  </div>
+                  <div className="flex justify-center items-center space-x-1 mt-2">
+                    {generatePageNumbers().map((page, index) =>(typeof page === 'number' ? (<button key={`page-${page}`} onClick={() => handlePageChange(page)} disabled={page === currentPage || loading} className={`min-w-[36px] h-9 px-2 py-1 border rounded-md text-sm font-medium flex items-center justify-center transition-colors duration-150 ${page === currentPage ? "bg-emerald-600 text-white border-emerald-600 cursor-default" : loading ? "text-gray-400 border-gray-200 cursor-not-allowed" : "border-gray-300 text-gray-700 hover:bg-gray-100 hover:border-gray-400"}`} aria-current={page === currentPage ? "page" : undefined}>{page}</button>) : (<span key={`ellipsis-${index}`} className="px-2 py-1 text-gray-500 text-sm flex items-center justify-center h-9">...</span>)))}
+                  </div>
+                  <div className="text-gray-600 text-xs mt-3">Page {currentPage} of {totalPages}</div>
+                </div>
+              )}
             </>
           )}
-           {!loading && !error && products.length === 0 && totalProducts > 0 && (currentPage > 1) && (
-             <div className="text-center py-8">
-               <p className="text-lg text-gray-600">No products found on this page.</p>
-               <button onClick={() => handlePageChange(1)} className="mt-2 text-sm text-emerald-600 hover:underline">Go to first page</button>
-             </div>
-           )}
+          {!loading && !error && products.length === 0 && totalProducts > 0 && (currentPage > 1) && (
+            <div className="text-center py-8"><p className="text-lg text-gray-600">No products found on this page.</p><button onClick={() => handlePageChange(1)} className="mt-2 text-sm text-emerald-600 hover:underline">Go to first page</button></div>
+          )}
         </section>
       </div>
+
+      {/* ====== SCROLL TO TOP BUTTON ====== */}
+      <button
+        onClick={scrollToTop}
+        className={`fixed bottom-6 right-6 sm:bottom-8 sm:right-8 
+                   bg-emerald-600 hover:bg-emerald-700 text-white 
+                   p-3 rounded-full shadow-lg z-40
+                   transition-all duration-300 ease-in-out 
+                   focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2
+                   ${showScrollToTopButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}
+        aria-label="Scroll to top"
+      >
+        <ArrowUpIcon className="h-6 w-6" />
+      </button>
 
       {/* ====== FOOTER ====== */}
       <footer className="bg-gray-800 text-gray-300 pt-10 pb-8">
