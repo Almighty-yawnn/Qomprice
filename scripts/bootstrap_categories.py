@@ -23,6 +23,7 @@ CATEGORIES = [
     ("home-appliances",  None),
     ("baby-kids",        None),
     ("sports-outdoor",   None),
+    ("kids-toys",        None),
 ]
 # ------------------------------------------------------------------------
 
