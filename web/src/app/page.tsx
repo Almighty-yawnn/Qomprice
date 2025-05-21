@@ -106,7 +106,7 @@ export default function Home() {
 
   const [selectedCategorySlug, setSelectedCategorySlug] = useState(initialCategoryFromUrl);
   const [categories, setCategories] = useState<Category[]>(MOCK_CATEGORIES);
-  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const [categoriesLoading] = useState(false);
 
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
   const [isCategoryDropdownVisible, setIsCategoryDropdownVisible] = useState(false);
