@@ -2,6 +2,7 @@
 
 import type { Product } from "@/types/product";
 
+
 export const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
 
 // fetchCategories stays the same if you have an endpoint /api/categories
@@ -9,6 +10,7 @@ export async function fetchCategories() {
   const res = await fetch(`${API}/api/categories`, { next: { revalidate: 60 } });
   return res.json() as Promise<{ slug: string }[]>;
 }
+
 
 export async function searchProducts(params: {
   q?: string;

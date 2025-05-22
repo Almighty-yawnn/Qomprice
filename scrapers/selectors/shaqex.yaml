@@ -1,0 +1,210 @@
+# selectors/jumia.yaml
+phones-tablets:
+  url: "https://store.shaqexpress.com/categories?cid=7-phones-and-tablets"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # product image inside the link
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500  # price paragraph     # <div class="prc">             # lazy-loaded images live on data-src
+
+home-office:
+  url: "https://store.shaqexpress.com/categories?cid=10-home-and-office"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph
+
+kids-toys:
+  url: "https://store.shaqexpress.com/categories?cid=9-kids-and-toys"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+fashion:
+  url: "https://store.shaqexpress.com/categories?cid=4-fashion"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+beauty-health:
+  url: "https://store.shaqexpress.com/categories?cid=3-beauty-and-health"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+groceries:
+  url: "https://store.shaqexpress.com/categories?cid=5-supermarket"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+pharmacy:
+  url: "https://store.shaqexpress.com/categories?cid=2-pharmacy"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+computing:
+  url: "https://store.shaqexpress.com/categories?cid=11-computing"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+tv-audio-video:
+  url: "https://store.shaqexpress.com/categories?cid=12-tv-audio-and-video"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+kitchen-dining:
+  url: "https://store.shaqexpress.com/categories?cid=13-kitchen-and-dining"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+sports-fitness:
+  url: "https://store.shaqexpress.com/categories?cid=14-sports-and-fitness"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+games-consoles:
+  url: "https://store.shaqexpress.com/categories?cid=15-games-and-consoles"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+books-stationery:
+  url: "https://store.shaqexpress.com/categories?cid=16-books-and-stationery"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+automobiles:
+  url: "https://store.shaqexpress.com/categories?cid=1-automobiles"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+building-construction:
+  url: "https://store.shaqexpress.com/categories?cid=18-building-and-construction"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+machinery-equipment:
+  url: "https://store.shaqexpress.com/categories?cid=19-machinery-and-equipment"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+funerals:
+  url: "https://store.shaqexpress.com/categories?cid=20-funerals"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+agriculture-supplies:
+  url: "https://store.shaqexpress.com/categories?cid=21-agriculture-supplies"
+  item:  li.group.relative                                    # each product container <li>
+  link:  a.secondary-bg-light                                 # the main clickable <a> tag inside the item
+  img:   a.secondary-bg-light div.aspect-h-1 img              # the <img class="img"> inside it
+  # NEW for the updated layout:
+  title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
+  price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
+
+# … repeat for every category …
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# phones-tablets:
+#   url: "https://www.jumia.com.gh/phones-tablets/?page=1#catalog-listing"
+
+#   # product card
+#   item:   "article.prd"
+
+#   # title inside the product
+#   title:  "div.name"
+
+#   # price inside the product
+#   price:  "div.prc"
+
+#   # product detail page link
+#   link:   "a.core"
+
+#   # image URL (lazy-loaded)
+#   img:    "img.img"
+
+
+
+
+
+
