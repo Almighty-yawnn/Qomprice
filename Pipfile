@@ -1,0 +1,22 @@
+[[source]]
+url = "https://pypi.org/simple"
+verify_ssl = true
+name = "pypi"
+
+[packages]
+fastapi = "*"
+uvicorn = {extras = ["standard"], version = "*"}
+sqlalchemy = ">=2.0"
+asyncpg = "*"
+databases = {extras = ["postgresql"], version = "*"}
+python-dotenv = "*"
+pyyaml = "*"
+playwright = "*"
+redis = "*"
+rq = "*"
+pydantic = "*"
+
+[dev-packages]
+
+[requires]
+python_version = "3.12"
