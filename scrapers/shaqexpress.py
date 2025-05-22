@@ -3,12 +3,12 @@ import asyncio
 from .base import BaseScraper
 
 
-class ShaqexScraper(BaseScraper):
+class ShaqexpressScraper(BaseScraper):
     site_id = "SHAQEXPRESS"
 
 
 async def main():
-    scraper = ShaqexScraper(category_slug="phones-tablets")
+    scraper = ShaqexpressScraper(category_slug="phones-tablets")
     await scraper.run()
     print("✅  ShaQexpress scrape complete")
 

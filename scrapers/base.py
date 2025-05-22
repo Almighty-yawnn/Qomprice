@@ -125,7 +125,7 @@ class BaseScraper:
                 await self._retry(
                     page.wait_for_selector,
                     self.selectors["item"],
-                    timeout=10000
+                    timeout=30000
                 )
 
                 items = await page.query_selector_all(self.selectors["item"])
