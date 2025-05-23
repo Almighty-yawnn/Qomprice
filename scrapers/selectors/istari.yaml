@@ -1,12 +1,14 @@
 # Istari (April 2025) – category 55 = Phones & Tablets
-phones-tablets:
-  url: "https://www.ishtari.com.gh/category/55?page=1"
-
-  # every product card in the grid
-  item:  "div[data-testid='product-card']"
-
-  # inner fields (relative to the card)
-  title: "p.product-card__title"
-  price: "span.product-card__price"
-  link:  "a.product-card__link"
-  img:   "img.product-card__image"
+fashion:
+  url: "https://www.ishtari.com.gh/category/693"
+  item: "div.slick-slide div div.p-1"
+  link: "a.cursor-pointer"
+  img:  "img.product-image-exp"
+  title: "div.h-8"
+  price: "strong.ext-d16"
+  pagination:
+    type: query      # one of: query, path, next
+    param: page      # for query
+    template: "?page={n}"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 3   # optional

@@ -1,3 +1,31 @@
-- site: JUMIA
+- site: TELEFONIKA
   category: phones-tablets
-  cron: "0 */3 * * *"
+  cron: "0 */6 * * *"
+
+- site: SHOPWICE
+  category: phones
+  cron: "15 */4 * * *"
+
+- site: MYGHMARKET
+  category: electronics
+  cron: "30 */5 * * *"
+
+- site: GET4LESSGHANA
+  category: mobile-phones
+  cron: "45 */3 * * *"
+
+- site: SHAQEXPRESS
+  category: fashion
+  cron: "0 */6 * * *"
+
+- site: ISHTARI
+  category: groceries
+  cron: "30 */6 * * *"
+
+
+
+
+
+# - site: JUMIA
+#   category: phones-tablets
+#   cron: "0 */3 * * *"

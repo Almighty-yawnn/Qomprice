@@ -10,6 +10,11 @@ const nextConfig: NextConfig = {
         hostname: "gh.jumia.is",   // Jumia CDN used in your data
         pathname: "/**",
       },
+      {
+        protocol: "https",
+        hostname: "shopwice.com",   // Shopwice CDN used in your data
+        pathname: "/**",
+      },
       // add more hosts here if you scrape other vendors
       // { protocol: "https", hostname: "*.supershop.com", pathname: "/**" },
     ],

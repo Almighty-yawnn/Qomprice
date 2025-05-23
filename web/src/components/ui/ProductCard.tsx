@@ -8,7 +8,7 @@ export default function ProductCard({ product }: { product: Product }) {
     <a
     href={
      firstListing?.affiliate_url
-             ? `https://jumia.com.gh${firstListing.affiliate_url}`
+             ? `${firstListing.affiliate_url}`
              : "#"
          }
       target="_blank"
@@ -18,17 +18,13 @@ export default function ProductCard({ product }: { product: Product }) {
       {/* 1️⃣ square wrapper guarantees height before the Image mounts */}
       <div className="relative w-full h-0 pb-[100%] rounded-md overflow-hidden bg-white">
         {firstListing?.image_url ? (
-          <Image
+        <Image
             src={firstListing.image_url}
             alt={product.title}
-            fill                 // keeps it responsive
-            sizes="(max-width: 640px) 45vw,
-                   (max-width:1024px) 22vw,
-                   180px"
-            priority
-            className="object-contain transition-transform duration-200 group-hover:scale-105"
+            fill
             unoptimized
-          />
+            referrerPolicy="no-referrer"
+        />
         ) : (
           <span className="text-gray-400 text-sm">No image</span>
         )}
