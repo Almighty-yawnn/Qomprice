@@ -1,23 +1,23 @@
 # selectors/jumia.yaml
 phones-tablets:
   url: "https://www.jumia.com.gh/phones-tablets/"
-  item:  article.c-prd               # your <article class="c-prd …">
-  link:  a.core                      # wrapper link
-  img:   a.core img.img              # the <img class="img"> inside it
+  item:  li.group               # your <article class="c-prd …">
+  link:  a.secondary-bg-light                      # wrapper link
+  img:   img.duration-700              # the <img class="img"> inside it
 
   # NEW for the updated layout:
-  title: a.core div.info h3.name     # <h3 class="name">
-  price: a.core div.info div.prc     # <div class="prc">             # lazy-loaded images live on data-src
+  title: p.px-2.font-medium    # <h3 class="name">
+  price: p.text-primary-500     # <div class="prc">             # lazy-loaded images live on data-src
 
 home-office:
-  url: "https://www.jumia.com.gh/home-office/"
-  item:  article.c-prd               # your <article class="c-prd …">
-  link:  a.core                      # wrapper link
-  img:   a.core img.img              # the <img class="img"> inside it
+  url: "https://store.shaqexpress.com/categories?cid=10-home-and-office"
+  item:  li.group               # your <article class="c-prd …">
+  link:  a.secondary-bg-light                      # wrapper link
+  img:   img.duration-700              # the <img class="img"> inside it
 
   # NEW for the updated layout:
-  title: a.core div.info h3.name     # <h3 class="name">
-  price: a.core div.info div.prc     # <div class="prc">
+  title: p.px-2.font-medium    # <h3 class="name">
+  price: p.text-primary-500   
 
 electronics:
   url: "https://www.jumia.com.gh/electronics/"

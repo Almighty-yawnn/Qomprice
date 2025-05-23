@@ -161,50 +161,5 @@ agriculture-supplies:
   title: a.secondary-bg-light p.font-medium.text-gray-900     # product title paragraph
   price: a.secondary-bg-light div.flex.px-2 p.font-medium.text-primary-500      # price paragraph        # lazy-loaded images live on data-src
 
-# … repeat for every category …
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-# phones-tablets:
-#   url: "https://www.jumia.com.gh/phones-tablets/?page=1#catalog-listing"
-
-#   # product card
-#   item:   "article.prd"
-
-#   # title inside the product
-#   title:  "div.name"
-
-#   # price inside the product
-#   price:  "div.prc"
-
-#   # product detail page link
-#   link:   "a.core"
-
-#   # image URL (lazy-loaded)
-#   img:    "img.img"
-
-
-
-
 
 

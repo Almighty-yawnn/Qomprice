@@ -1,0 +1,52 @@
+# selectors/jumia.yaml
+phones-tablets:
+  url: "https://telefonika.com/phones-tablets/phones/"
+  item:  div.wd-product.product-grid-item               # Each product container <div> with these classes
+  link:  a.product-image-link                           # The main product link wrapping the image
+  img:   a.product-image-link img                       # The product image inside the link
+  # NEW for the updated layout:
+  title: h3.wd-entities-title a                         # Product title link inside <h3>
+  price: span.price bdi                                 # Price element containing currency symbol and amount
+
+entertainments:
+  url: "https://telefonika.com/entertainments/"
+  item:  div.wd-product.product-grid-item               # Each product container <div> with these classes
+  link:  a.product-image-link                           # The main product link wrapping the image
+  img:   a.product-image-link img                       # The product image inside the link
+  # NEW for the updated layout:
+  title: h3.wd-entities-title a                         # Product title link inside <h3>
+  price: span.price bdi                                 # Price element containing currency symbol and amount
+
+gaming:
+  url: "https://telefonika.com/gaming-v2"
+  item:  div.wd-product.product-grid-item               # Each product container <div> with these classes
+  link:  a.product-image-link                           # The main product link wrapping the image
+  img:   a.product-image-link img                       # The product image inside the link
+  # NEW for the updated layout:
+  title: h3.wd-entities-title a                         # Product title link inside <h3>
+  price: span.price bdi                                 # Price element containing currency symbol and amount
+
+computers-hardware:
+  url: "https://telefonika.com/computers-hardware/"
+  item:  div.wd-product.product-grid-item               # Each product container <div> with these classes
+  link:  a.product-image-link                           # The main product link wrapping the image
+  img:   a.product-image-link img                       # The product image inside the link
+  # NEW for the updated layout:
+  title: h3.wd-entities-title a                         # Product title link inside <h3>
+  price: span.price bdi                                 # Price element containing currency symbol and amount
+
+gadgets-accessories:
+  url: "https://telefonika.com/gadgets-accessories/"
+  item:  div.wd-product.product-grid-item               # Each product container <div> with these classes
+  link:  a.product-image-link                           # The main product link wrapping the image
+  img:   a.product-image-link img                       # The product image inside the link
+  # NEW for the updated layout:
+  title: h3.wd-entities-title a                         # Product title link inside <h3>
+  price: span.price bdi                                 # Price element containing currency symbol and amount
+
+
+
+
+
+
+
