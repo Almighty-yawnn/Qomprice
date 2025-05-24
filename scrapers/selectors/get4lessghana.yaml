@@ -1,6 +1,6 @@
 # selectors/telefonika.yaml
 phones-tablets:
-  url: "https://get4lessghana.com/product-category/it-products/"
+  url: "https://get4lessghana.com/product-category/mobile-phones/"
   item: "li.rey-swatches.product"
   link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
   img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
@@ -11,17 +11,119 @@ phones-tablets:
     param: page      # for query
     template: "/page/{n}/"  # for path
     next_selector: "a.rey-ajaxLoadMore-btn"  # for next-button
-    max_pages: 3   # optional
+    max_pages: 5   # option or however many you want to limit to
 
+computer:
+  url: "https://get4lessghana.com/product-category/it-products/computer/"
+  item: "li.rey-swatches.product"
+  link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
+  price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.rey-ajaxLoadMore-btn"  # for next-button
+    max_pages: 10   # option or however many you want to limit to
 
+cameras:
+  url: "https://get4lessghana.com/product-category/promate/photography/cameras/"
+  item: "li.rey-swatches.product"
+  link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
+  price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.rey-ajaxLoadMore-btn"  # for next-button
+    max_pages: 2   # option or however many you want to limit to
 
+cameras-accessories:
+  url: "https://get4lessghana.com/product-category/promate/photography/camera-accessories/"
+  item: "li.rey-swatches.product"
+  link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
+  price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.rey-ajaxLoadMore-btn"  # for next-button
+    max_pages: 8   # option or however many you want to limit to
 
+television:
+  url: "https://get4lessghana.com/product-category/home-appliances/televisions/"
+  item: "li.rey-swatches.product"
+  link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
+  price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.rey-ajaxLoadMore-btn"  # for next-button
+    max_pages: 3   # option or however many you want to limit to
 
+kitchen-app:
+  url: "https://get4lessghana.com/product-category/home-appliances/kitchen-app/"
+  item: "li.rey-swatches.product"
+  link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
+  price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.rey-ajaxLoadMore-btn"  # for next-button
+    max_pages: 10   # option or however many you want to limit to
 
+audio:
+  url: "https://get4lessghana.com/product-category/audio/"
+  item: "li.rey-swatches.product"
+  link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
+  price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.rey-ajaxLoadMore-btn"  # for next-button
+    max_pages: 9   # option or however many you want to limit to
 
+gaming:
+  url: "https://get4lessghana.com/product-category/it-products/gaming-accessories/gaming/"
+  item: "li.rey-swatches.product"
+  link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
+  price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.rey-ajaxLoadMore-btn"  # for next-button
+    max_pages: 3   # option or however many you want to limit to
 
-
-
+security-cameras:
+  url: "https://get4lessghana.com/product-category/security-cameras/"
+  item: "li.rey-swatches.product"
+  link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
+  price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.rey-ajaxLoadMore-btn"  # for next-button
+    max_pages: 10   # option or however many you want to limit to
 
 
 

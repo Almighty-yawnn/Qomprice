@@ -11,4 +11,117 @@ fashion:
     param: page      # for query
     template: "?page={n}"  # for path
     next_selector: "a.next"  # for next-button
-    max_pages: 3   # optional
+    max_pages: 10   # optional
+
+home-kitchen:
+  url: "https://www.ishtari.com.gh/Home-Kitchen/c=133"
+  item: "div.slick-slide div div.p-1"
+  link: "a.cursor-pointer"
+  img:  "img.product-image-exp"
+  title: "div.h-8"
+  price: "strong.ext-d16"
+  pagination:
+    type: query      # one of: query, path, next
+    param: page      # for query
+    template: "?page={n}"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 10   # optional
+
+electronics:
+  url: "https://www.ishtari.com.gh/Electronics/c=2"
+  item: "div.slick-slide div div.p-1"
+  link: "a.cursor-pointer"
+  img:  "img.product-image-exp"
+  title: "div.h-8"
+  price: "strong.ext-d16"
+  pagination:
+    type: query      # one of: query, path, next
+    param: page      # for query
+    template: "?page={n}"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 10   # optional
+
+kitchen-dinning:
+  url: "https://www.ishtari.com.gh/Tools-Improvement/c=134"
+  item: "div.slick-slide div div.p-1"
+  link: "a.cursor-pointer"
+  img:  "img.product-image-exp"
+  title: "div.h-8"
+  price: "strong.ext-d16"
+  pagination:
+    type: query      # one of: query, path, next
+    param: page      # for query
+    template: "?page={n}"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 10   # optional
+
+tools-improvement:
+  url: "https://www.ishtari.com.gh/Tools-Improvement/c=265"
+  item: "div.slick-slide div div.p-1"
+  link: "a.cursor-pointer"
+  img:  "img.product-image-exp"
+  title: "div.h-8"
+  price: "strong.ext-d16"
+  pagination:
+    type: query      # one of: query, path, next
+    param: page      # for query
+    template: "?page={n}"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 10   # optional
+
+outdoor-gear:
+  url: "https://www.ishtari.com.gh/Outdoor-Gear/c=319"
+  item: "div.slick-slide div div.p-1"
+  link: "a.cursor-pointer"
+  img:  "img.product-image-exp"
+  title: "div.h-8"
+  price: "strong.ext-d16"
+  pagination:
+    type: query      # one of: query, path, next
+    param: page      # for query
+    template: "?page={n}"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 10   # optional
+
+sports-fitness:
+  url: "https://www.ishtari.com.gh/Sports-Fitness/c=322"
+  item: "div.slick-slide div div.p-1"
+  link: "a.cursor-pointer"
+  img:  "img.product-image-exp"
+  title: "div.h-8"
+  price: "strong.ext-d16"
+  pagination:
+    type: query      # one of: query, path, next
+    param: page      # for query
+    template: "?page={n}"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 10   # optional
+
+garden-patio:
+  url: "https://www.ishtari.com.gh/Patio-Garden/c=294"
+  item: "div.slick-slide div div.p-1"
+  link: "a.cursor-pointer"
+  img:  "img.product-image-exp"
+  title: "div.h-8"
+  price: "strong.ext-d16"
+  pagination:
+    type: query      # one of: query, path, next
+    param: page      # for query
+    template: "?page={n}"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 10   # optional
+
+tools:
+  url: "https://www.ishtari.com.gh/Luggage-Travel/c=352"
+  item: "div.slick-slide div div.p-1"
+  link: "a.cursor-pointer"
+  img:  "img.product-image-exp"
+  title: "div.h-8"
+  price: "strong.ext-d16"
+  pagination:
+    type: query      # one of: query, path, next
+    param: page      # for query
+    template: "?page={n}"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 10   # optional
+

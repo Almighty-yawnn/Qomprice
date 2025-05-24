@@ -1,3 +1,4 @@
+#selector/shopwice.yaml
 home-office:
   url: "https://shopwice.com/product-category/home-appliances/"
   item: "div.product-small.box"
@@ -10,4 +11,79 @@ home-office:
     param: page      # for query
     template: "/page/{n}/"  # for path
     next_selector: "a.next"  # for next-button
-    max_pages: 3   # optional
+    max_pages: 15   # optional
+
+gaming:
+  url: "https://shopwice.com/product-category/video-games-consoles-and-accessories/"
+  item: "div.product-small.box"
+  link: "a"
+  img:  "img"
+  title: "p.name.product-title a"
+  price: "span.price bdi"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 4   # optional
+
+audio:
+  url: "https://shopwice.com/product-category/audio/"
+  item: "div.product-small.box"
+  link: "a"
+  img:  "img"
+  title: "p.name.product-title a"
+  price: "span.price bdi"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 7   # optional
+
+entertainment:
+  url: "https://shopwice.com/product-category/tvs-home-entertainment/"
+  item: "div.product-small.box"
+  link: "a"
+  img:  "img"
+  title: "p.name.product-title a"
+  price: "span.price bdi"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 2   # optional
+
+cameras:
+  url: "https://shopwice.com/product-category/cameras/"
+  item: "div.product-small.box"
+  link: "a"
+  img:  "img"
+  title: "p.name.product-title a"
+  price: "span.price bdi"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 2   # optional
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

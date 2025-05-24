@@ -10,7 +10,7 @@ phones-tablets:
   price: p.text-primary-500     # <div class="prc">             # lazy-loaded images live on data-src
 
 home-office:
-  url: "https://store.shaqexpress.com/categories?cid=10-home-and-office"
+  url: "https://www.jumia.com.gh/home-office/"
   item:  li.group               # your <article class="c-prd …">
   link:  a.secondary-bg-light                      # wrapper link
   img:   img.duration-700              # the <img class="img"> inside it
