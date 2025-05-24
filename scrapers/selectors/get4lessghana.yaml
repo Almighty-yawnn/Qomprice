@@ -1,9 +1,9 @@
 # selectors/telefonika.yaml
-phones-tablets:
+mobile-phones:
   url: "https://get4lessghana.com/product-category/mobile-phones/"
   item: "li.rey-swatches.product"
   link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
-  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"
   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
   pagination:
@@ -17,7 +17,7 @@ computer:
   url: "https://get4lessghana.com/product-category/it-products/computer/"
   item: "li.rey-swatches.product"
   link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
-  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"
   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
   pagination:
@@ -31,7 +31,7 @@ cameras:
   url: "https://get4lessghana.com/product-category/promate/photography/cameras/"
   item: "li.rey-swatches.product"
   link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
-  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"
   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
   pagination:
@@ -45,7 +45,7 @@ cameras-accessories:
   url: "https://get4lessghana.com/product-category/promate/photography/camera-accessories/"
   item: "li.rey-swatches.product"
   link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
-  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"
   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
   pagination:
@@ -59,7 +59,7 @@ television:
   url: "https://get4lessghana.com/product-category/home-appliances/televisions/"
   item: "li.rey-swatches.product"
   link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
-  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"
   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
   pagination:
@@ -73,7 +73,7 @@ kitchen-app:
   url: "https://get4lessghana.com/product-category/home-appliances/kitchen-app/"
   item: "li.rey-swatches.product"
   link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
-  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"
   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
   pagination:
@@ -87,7 +87,7 @@ audio:
   url: "https://get4lessghana.com/product-category/audio/"
   item: "li.rey-swatches.product"
   link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
-  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"
   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
   pagination:
@@ -101,7 +101,7 @@ gaming:
   url: "https://get4lessghana.com/product-category/it-products/gaming-accessories/gaming/"
   item: "li.rey-swatches.product"
   link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
-  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"
   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
   pagination:
@@ -115,7 +115,7 @@ security-cameras:
   url: "https://get4lessghana.com/product-category/security-cameras/"
   item: "li.rey-swatches.product"
   link: "div.rey-productThumbnail a.woocommerce-LoopProduct-link"
-  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"
+  img:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"
   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"
   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"
   pagination:
@@ -134,7 +134,7 @@ security-cameras:
 #   url: "https://get4lessghana.com/product-category/it-products/computer/"
 #   item: "li.rey-swatches.product"                # product card container
 #   link:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link"  # product detail page link
-#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"  # product image inside link
+#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"  # product image inside link
 #   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"  # product title/link
 #   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"  # product price with currency symbol
 
@@ -142,7 +142,7 @@ security-cameras:
 #   url: "https://get4lessghana.com/product-category/promate/photography/cameras/"
 #   item: "li.rey-swatches.product"                      # product card container
 #   link:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link"  # product detail page link
-#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"  # product image inside link
+#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"  # product image inside link
 #   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"  # product title/link
 #   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"  # product price with currency symbol
 
@@ -150,7 +150,7 @@ security-cameras:
 #   url: "https://get4lessghana.com/product-category/promate/photography/camera-accessories/"
 #   item: "li.rey-swatches.product"                # product card container
 #   link:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link"  # product detail page link
-#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"  # product image inside link
+#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"  # product image inside link
 #   # NEW for the updated layout:
 #   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"  # product title/link
 #   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"  # product price with currency symbol
@@ -159,7 +159,7 @@ security-cameras:
 #   url: "https://get4lessghana.com/product-category/home-appliances/televisions/"
 #   item: "li.rey-swatches.product"                # product card container
 #   link:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link"  # product detail page link
-#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"  # product image inside link
+#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"  # product image inside link
 #   # NEW for the updated layout:
 #   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"  # product title/link
 #   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"  # product price with currency symbol
@@ -168,7 +168,7 @@ security-cameras:
 #   url: "https://get4lessghana.com/product-category/home-appliances/kitchen-app/"
 #   item: "li.rey-swatches.product"                # product card container
 #   link:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link"  # product detail page link
-#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"  # product image inside link
+#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"  # product image inside link
 #   # NEW for the updated layout:
 #   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"  # product title/link
 #   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"  # product price with currency symbol
@@ -177,7 +177,7 @@ security-cameras:
 #   url: "https://get4lessghana.com/product-category/audio/"
 #   item: "li.rey-swatches.product"                # product card container
 #   link:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link"  # product detail page link
-#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"  # product image inside link
+#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"  # product image inside link
 #   # NEW for the updated layout:
 #   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"  # product title/link
 #   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"  # product price with currency symbol
@@ -186,7 +186,7 @@ security-cameras:
 #   url: "https://get4lessghana.com/product-category/mobile-phones/"
 #   item: "li.rey-swatches.product"                # product card container
 #   link:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link"  # product detail page link
-#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"  # product image inside link
+#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"  # product image inside link
 #   # NEW for the updated layout:
 #   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"  # product title/link
 #   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"  # product price with currency symbol
@@ -195,7 +195,7 @@ security-cameras:
 #   url: "https://get4lessghana.com/product-category/it-products/gaming-accessories/gaming/"
 #   item: "li.rey-swatches.product"                # product card container
 #   link:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link"  # product detail page link
-#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"  # product image inside link
+#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"  # product image inside link
 #   # NEW for the updated layout:
 #   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"  # product title/link
 #   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"  # product price with currency symbol
@@ -204,7 +204,7 @@ security-cameras:
 #   url: "https://get4lessghana.com/product-category/security-cameras/"
 #   item: "li.rey-swatches.product"                # product card container
 #   link:  "div.rey-productThumbnail a.woocommerce-LoopProduct-link"  # product detail page link
-#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img"  # product image inside link
+#   img:   "div.rey-productThumbnail a.woocommerce-LoopProduct-link img.img--1"  # product image inside link
 #   # NEW for the updated layout:
 #   title: "div.rey-loopDetails h2.woocommerce-loop-product__title a"  # product title/link
 #   price: "div.rey-loopDetails span.price span.woocommerce-Price-amount"  # product price with currency symbol
