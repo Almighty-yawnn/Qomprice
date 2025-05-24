@@ -1,0 +1,140 @@
+#selector/ghmarket.yaml
+phones-and-accessories:
+  url: "https://myghmarket.com/product-category/phones-and-accessories/?v=19b19ffc30ca"
+  item: "div.product-small.col"                              # product card container
+  link: "div.box-image div.image-fade_in_back a"             # product detail page link
+  img:  "div.box-image div.image-fade_in_back a img.attachment-woocommerce_thumbnail"  # main product image
+  title: "div.box-text-products p.name.product-title a.woocommerce-LoopProduct-link"  # product title/link
+  price: "div.price-wrapper span.price span.woocommerce-Price-amount"                # product price
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 4   # optional
+
+home-appliances:
+  url: "https://myghmarket.com/product-category/home-appliances/?v=19b19ffc30ca"
+  item: "div.product-small.col"                              # product card container
+  link: "div.box-image div.image-fade_in_back a"             # product detail page link
+  img:  "div.box-image div.image-fade_in_back a img.attachment-woocommerce_thumbnail"  # main product image
+  title: "div.box-text-products p.name.product-title a.woocommerce-LoopProduct-link"  # product title/link
+  price: "div.price-wrapper span.price span.woocommerce-Price-amount"                # product price
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 15   # optional
+
+home-office:
+  url: "https://myghmarket.com/product-category/home-appliances/home-office/?v=19b19ffc30ca"
+  item: "div.product-small.col"                              # product card container
+  link: "div.box-image div.image-fade_in_back a"             # product detail page link
+  img:  "div.box-image div.image-fade_in_back a img.attachment-woocommerce_thumbnail"  # main product image
+  title: "div.box-text-products p.name.product-title a.woocommerce-LoopProduct-link"  # product title/link
+  price: "div.price-wrapper span.price span.woocommerce-Price-amount"                # product price
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 8   # optional
+
+computing:
+  url: "https://myghmarket.com/product-category/computing/?v=19b19ffc30ca"
+  item: "div.product-small.col"                              # product card container
+  link: "div.box-image div.image-fade_in_back a"             # product detail page link
+  img:  "div.box-image div.image-fade_in_back a img.attachment-woocommerce_thumbnail"  # main product image
+  title: "div.box-text-products p.name.product-title a.woocommerce-LoopProduct-link"  # product title/link
+  price: "div.price-wrapper span.price span.woocommerce-Price-amount"                # product price
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 1   # optional
+
+beauty-perfumes:
+  url: "https://myghmarket.com/product-category/beauty-and-perfumes/?v=19b19ffc30ca"
+  item: "div.product-small.col"                              # product card container
+  link: "div.box-image div.image-fade_in_back a"             # product detail page link
+  img:  "div.box-image div.image-fade_in_back a img.attachment-woocommerce_thumbnail"  # main product image
+  title: "div.box-text-products p.name.product-title a.woocommerce-LoopProduct-link"  # product title/link
+  price: "div.price-wrapper span.price span.woocommerce-Price-amount"                # product price
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 7   # optional
+
+clothing:
+  url: "https://myghmarket.com/product-category/clothing/?v=19b19ffc30ca"
+  item: "div.product-small.col"                              # product card container
+  link: "div.box-image div.image-fade_in_back a"             # product detail page link
+  img:  "div.box-image div.image-fade_in_back a img.attachment-woocommerce_thumbnail"  # main product image
+  title: "div.box-text-products p.name.product-title a.woocommerce-LoopProduct-link"  # product title/link
+  price: "div.price-wrapper span.price span.woocommerce-Price-amount"                # product price
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 2   # optional
+
+family-health:
+  url: "https://myghmarket.com/product-category/family-health/?v=19b19ffc30ca"
+  item: "div.product-small.col"                              # product card container
+  link: "div.box-image div.image-fade_in_back a"             # product detail page link
+  img:  "div.box-image div.image-fade_in_back a img.attachment-woocommerce_thumbnail"  # main product image
+  title: "div.box-text-products p.name.product-title a.woocommerce-LoopProduct-link"  # product title/link
+  price: "div.price-wrapper span.price span.woocommerce-Price-amount"                # product price
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 1   # optional
+
+supermarket":
+  url: "https://myghmarket.com/product-category/super-market/?v=19b19ffc30ca"
+  item: "div.product-small.col"                              # product card container
+  link: "div.box-image div.image-fade_in_back a"             # product detail page link
+  img:  "div.box-image div.image-fade_in_back a img.attachment-woocommerce_thumbnail"  # main product image
+  title: "div.box-text-products p.name.product-title a.woocommerce-LoopProduct-link"  # product title/link
+  price: "div.price-wrapper span.price span.woocommerce-Price-amount"                # product price
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 4   # optional
+
+home-decor:
+  url: "https://myghmarket.com/product-category/home-decor/?v=19b19ffc30ca"
+  item: "div.product-small.col"                              # product card container
+  link: "div.box-image div.image-fade_in_back a"             # product detail page link
+  img:  "div.box-image div.image-fade_in_back a img.attachment-woocommerce_thumbnail"  # main product image
+  title: "div.box-text-products p.name.product-title a.woocommerce-LoopProduct-link"  # product title/link
+  price: "div.price-wrapper span.price span.woocommerce-Price-amount"                # product price
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 1   # optional
+
+books-stationery::
+  url: "http://myghmarket.com/product-category/books-and-stationery/stationery/?v=19b19ffc30ca"
+  item: "div.product-small.col"                              # product card container
+  link: "div.box-image div.image-fade_in_back a"             # product detail page link
+  img:  "div.box-image div.image-fade_in_back a img.attachment-woocommerce_thumbnail"  # main product image
+  title: "div.box-text-products p.name.product-title a.woocommerce-LoopProduct-link"  # product title/link
+  price: "div.price-wrapper span.price span.woocommerce-Price-amount"                # product price
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 1   # optional
