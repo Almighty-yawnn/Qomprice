@@ -1,6 +1,7 @@
 // src/types/product.ts
 
 export interface VendorListing {
+  store_name: string;
   site_id: string;
   site_category_id: string;
   price: number;
