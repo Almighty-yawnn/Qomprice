@@ -11,7 +11,7 @@ home-office:
     param: page      # for query
     template: "/page/{n}/"  # for path
     next_selector: "a.next"  # for next-button
-    max_pages: 15   # optional
+    max_pages: 1   # optional
 
 gaming:
   url: "https://shopwice.com/product-category/video-games-consoles-and-accessories/"

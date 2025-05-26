@@ -11,7 +11,7 @@ mobile-phones:
     param: page      # for query
     template: "/page/{n}/"  # for path
     next_selector: "a.rey-ajaxLoadMore-btn"  # for next-button
-    max_pages: 5   # option or however many you want to limit to
+    max_pages: 1   # option or however many you want to limit to
 
 computer:
   url: "https://get4lessghana.com/product-category/it-products/computer/"

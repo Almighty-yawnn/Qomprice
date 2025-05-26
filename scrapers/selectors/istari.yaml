@@ -11,7 +11,7 @@ fashion:
     param: page      # for query
     template: "?page={n}"  # for path
     next_selector: "a.next"  # for next-button
-    max_pages: 10   # optional
+    max_pages: 1   # optional
 
 home-kitchen:
   url: "https://www.ishtari.com.gh/Home-Kitchen/c=133"
