@@ -329,7 +329,7 @@ export default function Home() {
             <Link href="/" className="hover:text-white">Komprice</Link>
           </h1>
           <nav className={`hidden md:flex transition-all duration-300 ease-in-out ${isScrolled ? 'gap-6 text-xs sm:text-sm' : 'gap-8 text-sm'}`}>
-            <Link href="/compare" className="hover:underline hover:text-white">Compare</Link>
+           {/* <Link href="/compare" className="hover:underline hover:text-white">Compare</Link>*/}
             <Link href="/about" className="hover:underline hover:text-white">About</Link>
           </nav>
         </div>
