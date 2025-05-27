@@ -1,0 +1,88 @@
+# scrapers/category_hierarchy.yaml
+Electronics:
+  Mobile Phones & Tablets:
+    - Mobile Phones
+    - Phones & Accessories
+    - Phones-Tablets
+  Computers & Accessories:
+    - Computers
+    - Computing
+    - Computers-Hardware
+    - Gadgets-Accessories
+    - Home-Office
+  Cameras & Photography:
+    - Cameras
+    - Camera-Accessories
+    - Security Cameras
+  TV, Audio & Video:
+    - Televisions
+    - TV-Audio-Video
+    - Audio
+  Gaming & Entertainment:
+    - Gaming
+    - Games-Consoles
+    - Entertainment
+
+Home & Kitchen:
+  Kitchen Appliances:
+    - Kitchen Appliances
+  Kitchen & Dining:
+    - Kitchen & Dining
+  Home Appliances:
+    - Home Appliances
+  Home Decor:
+    - Home Decor
+  Home-Kitchen:
+    - Home-Kitchen
+  Garden & Patio:
+    - Garden & Patio
+  Tools & Improvement:
+    - Tools & Improvement
+  Outdoor Gear:
+    - Outdoor Gear
+
+Fashion & Beauty:
+  Fashion:
+    - Fashion
+  Clothing:
+    - Clothing
+  Beauty & Perfumes:
+    - Beauty & Perfumes
+  Beauty-Health:
+    - Beauty-Health
+  Family Health:
+    - Family Health
+  Luggage & Travel:
+    - Luggage & Travel
+
+Sports & Fitness:
+  Sport-Fitness:
+    - Sport-Fitness
+
+Kids, Babies & Toys:
+  Kids-Toys:
+    - Kids-Toys
+
+Books, Stationery & Office:
+  Books-Stationery:
+    - Books-Stationery
+
+Groceries & Supermarket:
+  Groceries:
+    - Groceries
+  Supermarket:
+    - Supermarket
+  Pharmacy:
+    - Pharmacy
+
+Automotive & Industrial:
+  Automobiles:
+    - Automobiles
+  Machinery-Equipment:
+    - Machinery-Equipment
+  Building-Construction:
+    - Building-Construction
+  Agriculture-Supplies:
+    - Agriculture-Supplies
+  Funerals:
+    - Funerals

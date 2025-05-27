@@ -4,16 +4,17 @@ from app.db import engine, AsyncSessionLocal
 from app.models import Category
 
 CATEGORIES = [
-    ("phones-tablets", None),
-    ("electronics", None),
-    ("groceries", None),
-    ("fashion", None),
-    ("beauty", None),
-    ("home-appliances", None),
-    ("baby-kids", None),
-    ("sports-outdoor", None),
-    ("kids-toys", None),
+    # slug, parent_id
+    ("electronics",      None),
+    ("home-kitchen",      None),
+    ("fashion-beauty",    None),
+    ("sports-fitness",    None),
+    ("kids-toys",         None),
+    ("books-stationery",  None),
+    ("groceries-supermarket", None),
+    ("automotive-industrial", None),
 ]
+
 
 async def main():
     async with engine.begin() as conn:

@@ -9,9 +9,30 @@ from app import models, db
 from sqlalchemy import select
 from app.models import Category
 
+import yaml
+from pathlib import Path
+from slugify import slugify   # pip install python-slugify
+
+
 
 class BaseScraper:
     site_id: str
+
+     # ─── load the hierarchy ONCE ───────────────────────────────
+    _alias_map = {}
+    @classmethod
+    def _build_alias_map(cls):
+        path = Path(__file__).parent / "category_hierarchy.yaml"
+        raw = yaml.safe_load(open(path, encoding="utf-8"))
+        for universal, groups in raw.items():
+            # turn the universal name into the slug you used in bootstrap
+            uni_slug = slugify(universal, lowercase=True)
+            for subcategory, aliases in groups.items():
+                for alias in aliases:
+                    cls._alias_map[alias.lower()] = uni_slug
+
+    # ensure it’s built
+    _build_alias_map()
 
     def __init__(self, category_slug: str, cfg: dict):
         self.category_slug = category_slug
@@ -146,9 +167,16 @@ class BaseScraper:
                 await asyncio.sleep(attempt)
 
     async def resolve_category_id(self, session):
-        return await session.scalar(
-            select(Category.id).where(Category.slug == self.category_slug)
+        # 1) look up the alias → universal slug
+        uni_slug = self._alias_map.get(
+            self.category_slug.lower(),
+            self.category_slug  # fallback to itself if no alias
         )
+        # 2) fetch the Category.id by that slug
+        return await session.scalar(
+            select(Category.id).where(Category.slug == uni_slug)
+        )
+
 
     async def run(self):
         async with async_playwright() as p:
