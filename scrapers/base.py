@@ -2,51 +2,55 @@
 
 from playwright.async_api import async_playwright
 from pathlib import Path
-import asyncio, uuid, datetime, random, re
+import asyncio, uuid, datetime, random, re, yaml
 from urllib.parse import urlparse, urljoin
 
+from slugify import slugify     # pip install python-slugify
 from app import models, db
 from sqlalchemy import select
 from app.models import Category
 
-import yaml
-from pathlib import Path
-from slugify import slugify   # pip install python-slugify
+# ────────────────────────────────────────────────────────────────────────────
+# Build alias map once at import time, from your hierarchy YAML
+# ────────────────────────────────────────────────────────────────────────────
 
+
+# Simple slugify helper to replace non-alphanumerics with hyphens
+def slugify_text(s: str) -> str:
+    text = s.strip().lower()
+    # replace any run of non-a–z0–9 with a single hyphen
+    text = re.sub(r'[^a-z0-9]+', '-', text)
+    return text.strip('-')
+
+# Build ALIAS_MAP from category_hierarchy.yaml
+_hierarchy_path = Path(__file__).parent / "category_hierarchy.yaml"
+_hierarchy_raw  = yaml.safe_load(open(_hierarchy_path, encoding="utf-8"))
+
+ALIAS_MAP = {}
+for universal_name, groups in _hierarchy_raw.items():
+    uni_slug = slugify_text(universal_name)
+    for aliases in groups.values():
+        for alias in aliases:
+            ALIAS_MAP[alias.strip().lower()] = uni_slug
+
+# ────────────────────────────────────────────────────────────────────────────
 
 
 class BaseScraper:
     site_id: str
 
-     # ─── load the hierarchy ONCE ───────────────────────────────
-    _alias_map = {}
-    @classmethod
-    def _build_alias_map(cls):
-        path = Path(__file__).parent / "category_hierarchy.yaml"
-        raw = yaml.safe_load(open(path, encoding="utf-8"))
-        for universal, groups in raw.items():
-            # turn the universal name into the slug you used in bootstrap
-            uni_slug = slugify(universal, lowercase=True)
-            for subcategory, aliases in groups.items():
-                for alias in aliases:
-                    cls._alias_map[alias.lower()] = uni_slug
-
-    # ensure it’s built
-    _build_alias_map()
+    # expose the prebuilt map on the class
+    alias_map = ALIAS_MAP
 
     def __init__(self, category_slug: str, cfg: dict):
         self.category_slug = category_slug
-        self.selectors = cfg
+        self.selectors     = cfg
 
-        # Derive base_url (e.g. "https://shopwice.com") to resolve relative paths
+        # derive base_url for resolving relative paths
         parsed = urlparse(self.selectors["url"])
         self.base_url = f"{parsed.scheme}://{parsed.netloc}"
 
     async def _retry(self, fn: callable, *args, retries: int = 3, backoff_base: float = 1.0, **kwargs):
-        """
-        Calls `await fn(*args, **kwargs)`, retrying up to `retries` times
-        with exponential back-off (1s, 2s, 3s...).
-        """
         for attempt in range(1, retries + 1):
             try:
                 return await fn(*args, **kwargs)
@@ -58,67 +62,60 @@ class BaseScraper:
                 await asyncio.sleep(wait)
 
     async def parse_items(self, items):
-        """
-        Given a list of Playwright ElementHandles, extract
-        title, price, link & image and return a list of payload dicts.
-        """
         payloads = []
         for item in items:
             try:
                 # — TITLE —
                 title_el = await item.query_selector(self.selectors["title"])
-                title = (await title_el.text_content()).strip() if title_el else None
+                title    = (await title_el.text_content()).strip() if title_el else None
 
-                # — PRICE —
+                # — PRICE (regex to extract the first numeric group) —
                 price = 0.0
-                price_el = await item.query_selector(self.selectors["price"])
+                price_el   = await item.query_selector(self.selectors["price"])
                 price_text = (await price_el.text_content()).strip() if price_el else ""
                 if price_text:
-                    # grab first numeric group (handles commas)
-                    match = re.search(r"[\d,\.]+", price_text)
-                    if match:
-                        raw = match.group().replace(",", "")
+                    m = re.search(r"[\d,\.]+", price_text)
+                    if m:
+                        raw = m.group().replace(",", "")
                         try:
                             price = float(raw)
                         except ValueError:
                             price = 0.0
 
-                # — AFFILIATE LINK —
+                # — AFFILIATE URL (make absolute if needed) —
                 link_el = await item.query_selector(self.selectors["link"])
-                href = await link_el.get_attribute("href") if link_el else None
+                href    = await link_el.get_attribute("href") if link_el else None
                 if href and not href.startswith("http"):
                     href = urljoin(self.base_url, href)
 
-                # — IMAGE URL —
-                img_el = await item.query_selector(self.selectors["img"])
+                # — IMAGE URL (try srcset → data-src → src → custom attrs) —
+                img_el  = await item.query_selector(self.selectors["img"])
                 img_url = None
                 if img_el:
-                    # 1) try srcset lists (data-srcset or srcset)
+                    # 1) look for a srcset list
                     for attr in ("data-srcset", "srcset"):
                         val = await img_el.get_attribute(attr)
                         if val:
                             # pick the largest width candidate
-                            candidates = [s.strip() for s in val.split(",")]
-                            def width_of(s: str):
-                                try:
-                                    return int(s.rsplit(" ", 1)[1].rstrip("w"))
-                                except:
-                                    return 0
-                            best = max(candidates, key=width_of)
+                            cand = [s.strip() for s in val.split(",")]
+                            def w(e: str):
+                                try: return int(e.rsplit(" ", 1)[1].rstrip("w"))
+                                except: return 0
+                            best = max(cand, key=w)
                             img_url = best.split(" ", 1)[0]
                             break
-                    # 2) fallback to data-src or src or any custom data-wood-src
+                    # 2) fallback to data-src, data-wood-src, or src
                     if not img_url:
                         for attr in ("data-src", "data-wood-src", "src"):
                             v = await img_el.get_attribute(attr)
                             if v:
                                 img_url = v
                                 break
-                    # 3) normalize relative to absolute
+                    # 3) resolve relative URLs
                     if img_url and not img_url.startswith("http"):
                         img_url = urljoin(self.base_url, img_url)
 
-                # Only emit if we have the 3 essentials
+                # only emit if we have title, href, and an image
                 if title and href and img_url:
                     payloads.append({
                         "id":            str(uuid.uuid4()),
@@ -135,9 +132,6 @@ class BaseScraper:
         return payloads
 
     async def _save_with_retry(self, payloads, retries: int = 3):
-        """
-        Save this small batch of payloads, retrying commit if necessary.
-        """
         for attempt in range(1, retries + 1):
             try:
                 async with db.AsyncSessionLocal() as session:
@@ -167,16 +161,11 @@ class BaseScraper:
                 await asyncio.sleep(attempt)
 
     async def resolve_category_id(self, session):
-        # 1) look up the alias → universal slug
-        uni_slug = self._alias_map.get(
-            self.category_slug.lower(),
-            self.category_slug  # fallback to itself if no alias
-        )
-        # 2) fetch the Category.id by that slug
+        # look up the universal slug, defaulting to the raw slug
+        uni = self.alias_map.get(self.category_slug.lower(), self.category_slug)
         return await session.scalar(
-            select(Category.id).where(Category.slug == uni_slug)
+            select(Category.id).where(Category.slug == uni)
         )
-
 
     async def run(self):
         async with async_playwright() as p:
@@ -189,23 +178,24 @@ class BaseScraper:
                         "Chrome/120.0.0.0 Safari/537.36"
                     )
                 },
-                viewport={"width": 1280, "height": 720}
+                viewport={"width": 1280, "height": 720},
             )
             page = await context.new_page()
 
-            # 1) Navigate to the category’s base URL
+            # navigate to the category URL
             await self._retry(page.goto, self.selectors["url"], timeout=60000)
 
             pag = self.selectors.get("pagination", {})
 
-            # — Infinite scroll support —
+            # ─── infinite scroll ───────────────────────
             if pag.get("type") == "infinite":
-                prev_count = 0
-                scroll_delay = pag.get("scroll_delay", 2.0)
+                prev_count  = 0
+                scroll_wait = pag.get("scroll_delay", 2.0)
                 print("⏬ Starting infinite scroll…")
                 while True:
                     await page.evaluate("window.scrollTo(0, document.body.scrollHeight)")
-                    await asyncio.sleep(scroll_delay)
+                    await asyncio.sleep(scroll_wait)
+
                     items = await page.query_selector_all(self.selectors["item"])
                     print(f"   → loaded {len(items)} items")
                     if len(items) <= prev_count:
@@ -216,17 +206,16 @@ class BaseScraper:
                 payloads = await self.parse_items(items)
                 await self._save_with_retry(payloads)
 
-            # — Paginated (query / path / next-button) —
+            # ─── paginated (query / path / next-button) ───────────────────────
             else:
-                page_num = 1
+                page_num  = 1
                 max_pages = pag.get("max_pages", None)
 
                 while True:
-                    # build the URL
                     if pag.get("type") == "query":
                         url = f"{self.selectors['url']}?{pag['param']}={page_num}"
                     elif pag.get("type") == "path":
-                        url = self.selectors['url'].rstrip("/") + pag['template'].format(n=page_num)
+                        url = self.selectors["url"].rstrip("/") + pag["template"].format(n=page_num)
                     else:
                         url = self.selectors["url"]
 
@@ -242,7 +231,6 @@ class BaseScraper:
                     payloads = await self.parse_items(items)
                     await self._save_with_retry(payloads)
 
-                    # if "next" pagination, click the button
                     if pag.get("type") == "next":
                         nxt = await page.query_selector(pag["next_selector"])
                         if not nxt:

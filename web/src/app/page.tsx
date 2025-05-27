@@ -48,51 +48,22 @@ const SCROLL_TO_TOP_THRESHOLD = 300;
 const DEBOUNCE_DELAY = 400;
 const DROPDOWN_CLOSE_DELAY = 200;
 
-// inside src/app/page.tsx, replace your searchProducts with:
-
-const searchProducts = async ({
-  q,
-  category,
-  limit,
-  page,
-}: {
-  q: string;
-  category?: string;
-  limit: number;
-  page: number;
-}): Promise<{ products: Product[]; total: number }> => {
+const searchProducts = async ({ q, category, limit, page }: { q: string; category?: string; limit: number; page: number }): Promise<{ products: Product[], total: number }> => {
   console.log(`(Client Sim) Searching products: q=${q}, category=${category}, limit=${limit}, page=${page}`);
+  
+  const allMatchingProductsUnshuffled: Product[] = await originalSearchProducts({ q, category }); 
+  console.log(`(Client Sim) Fetched ${allMatchingProductsUnshuffled.length} total products for q='${q}', category='${category}' before shuffle.`);
 
-  // 1️⃣ Fetch everything from the API (which may ignore category)
-  let allMatchingProducts: Product[] = await originalSearchProducts({
-    q,
-    category,
-    limit,
-    page,
-  });
-  console.log(`(Client Sim) Fetched ${allMatchingProducts.length} total products for q='${q}', category='${category}'.`);
+  const allMatchingProducts = shuffleArray(allMatchingProductsUnshuffled);
+  console.log(`(Client Sim) Shuffled ${allMatchingProducts.length} products.`);
 
-  // 2️⃣ Client-side filter: only keep those whose listing matches our category slug
-  if (category) {
-    const beforeFilter = allMatchingProducts.length;
-    allMatchingProducts = allMatchingProducts.filter((p) =>
-      p.listings.some((listing) => listing.site_category_id === category)
-    );
-    console.log(`(Client Sim) Filtered by category '${category}': ${beforeFilter} → ${allMatchingProducts.length}`);
-  }
-
-  // 3️⃣ Shuffle the filtered list
-  const shuffled = shuffleArray(allMatchingProducts);
-  console.log(`(Client Sim) Shuffled down to ${shuffled.length} products.`);
-
-  // 4️⃣ Paginate
   const offset = (page - 1) * limit;
-  const paginatedResults = shuffled.slice(offset, offset + limit);
-  const total = shuffled.length;
+  const paginatedResults = allMatchingProducts.slice(offset, offset + limit);
+  const total = allMatchingProducts.length;
 
   return {
     products: paginatedResults,
-    total,
+    total: total,
   };
 };
 
