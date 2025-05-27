@@ -1,35 +1,50 @@
 // src/types/product.ts
 
 export interface VendorListing {
-  store_name: string;
   site_id: string;
-  site_category_id: string;
-  price: number;
+  price: number; // Price is here
   currency: string;
-  affiliate_url: string;
-  image_url: string;
-  stock_status: boolean;
-  scraped_at?: string;
-  categorySlug: string; // Assuming this is specific to the vendor's categorization
+  affiliate_url?: string;
+  image_url?: string;
+  store_name?: string;
+  site_category_id?: string;
+  stock_status?: boolean;
+  title?: string; // Listing-specific title
 }
 
-export interface Category { // <-- ADD THIS EXPORTED INTERFACE
+export interface Product {
+  name: string;
+  price: number | undefined;
+  id: string;
+  title: string;           // This is the primary name. 'name' should NOT be a separate required field here.
+  listings: VendorListing[];
+  imageUrl?: string;      // For ProductCard's main image (camelCase)
+  seller?: string;        // Optional top-level seller information
+
+  // CRITICAL: Ensure 'name' and 'price' are NOT defined here as top-level required properties
+  // unless that's truly your data model (but based on ProductCard, price comes from listings).
+}
+
+// Other types like Category, DynamicFilterOption, AvailableDynamicFilters, SelectedDynamicFilters
+// can remain as they were in the previous complete file I sent.
+export interface Category {
   label: string;
   slug: string;
 }
 
-export interface Product {
-  id: string;
-  name: string; // Ideally not 'any'
-  title: string;
-  description?: string; // Ideally not 'any'
-  price: number;
-  imageUrl?: string; // If you have a main product image
-  inStock: boolean;
-  onSale: boolean;
-  brand?: string; // Ideally not 'any'
-  seller?: string; // Ideally not 'any'
-  // category: string; // General category name (you might use this or the slug)
-  categorySlug: string; // For filtering, matches slug in MOCK_CATEGORIES / Category type
-  listings: VendorListing[];
+export interface DynamicFilterOption {
+  label: string;
+  value: string;
+}
+
+export interface AvailableDynamicFilters {
+  site_id?: DynamicFilterOption[];
+}
+
+export interface SelectedDynamicFilters {
+  site_id?: string;
+  priceRange?: {
+    min?: number;
+    max?: number;
+  };
 }
