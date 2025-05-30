@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from contextlib import asynccontextmanager
 from . import crud, schemas
 from app.api import products 
+from app.api.category_tree import router as cat_tree_router
 from app.api import seed as seed_module
 from sqlalchemy import select      #  ⬅️  add this line
 from app.models import Product, Category
@@ -77,3 +78,4 @@ async def search(
 app.include_router(products.router, prefix="/api")
 app.include_router(seed_module.router)  # ✅ add this
 
+app.include_router(cat_tree_router, prefix="/api")

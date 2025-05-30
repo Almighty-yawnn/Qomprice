@@ -2,14 +2,23 @@
 "use client";
 
 import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState, useMemo, useRef, useCallback, ChangeEvent } from "react";
-import ProductCard from "@/components/ui/ProductCard"; 
-import { searchProducts as originalSearchProducts } from "@/lib/api"; 
-import type { Product, Category } from "@/types/product"; 
+import {
+  useEffect,
+  useState,
+  useMemo,
+  useRef,
+  useCallback,
+  ChangeEvent
+} from "react";
+import ProductCard from "@/components/ui/ProductCard";
+import {
+  searchProducts as originalSearchProducts,
+  fetchCategoryTree
+} from "@/lib/api";
+import type { Product, Category } from "@/types/product";
 import Link from "next/link";
 import AppLoader from "@/components/ui/AppLoader";
 import CategoryDropdown from "@/components/ui/CategoryDropdown";
-
 import {
   XMarkIcon,
   MagnifyingGlassIcon,
@@ -17,194 +26,356 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronDownIcon,
-  ArrowUpIcon,
+  ArrowUpIcon
 } from "@heroicons/react/24/outline";
 
-// --- Helper function to shuffle an array (Fisher-Yates shuffle) ---
-function shuffleArray<T>(array: T[]): T[] {
-  const newArray = [...array]; 
-  for (let i = newArray.length - 1; i > 0; i--) {
+const currentYear = new Date().getFullYear();
+
+// ─── Helper: Fisher–Yates shuffle ───────────────────────────────────
+function shuffleArray<T>(a: T[]): T[] {
+  const arr = [...a];
+  for (let i = arr.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]]; 
+    [arr[i], arr[j]] = [arr[j], arr[i]];
   }
-  return newArray;
+  return arr;
 }
 
-// --- Constants and Mocks ---
-const MOCK_CATEGORIES: Category[] = [
-  { label: "All Categories", slug: "" },
-  { label: "Phones & Tablets", slug: "phones-tablets" },
-  { label: "Laptops", slug: "laptops" },
-  { label: "Fashion", slug: "fashion" },
-  { label: "Home & Kitchen", slug: "home-kitchen" },
-  { label: "Electronics", slug: "electronics" },
-];
-const POPULAR_CATEGORIES_SLUGS = ["", "phones-tablets", "laptops", "electronics"];
-const PER_PAGE_OPTIONS = [10, 20, 30, 50, 100];
-const DEFAULT_PRODUCTS_PER_PAGE = 30;
-const currentYear = new Date().getFullYear();
-const HEADER_SCROLL_THRESHOLD = 50;
-const SCROLL_TO_TOP_THRESHOLD = 300;
-const DEBOUNCE_DELAY = 400;
-const DROPDOWN_CLOSE_DELAY = 200;
-
-const searchProducts = async ({ q, category, limit, page }: { q: string; category?: string; limit: number; page: number }): Promise<{ products: Product[], total: number }> => {
-  console.log(`(Client Sim) Searching products: q=${q}, category=${category}, limit=${limit}, page=${page}`);
-  
-  const allMatchingProductsUnshuffled: Product[] = await originalSearchProducts({ q, category }); 
-  console.log(`(Client Sim) Fetched ${allMatchingProductsUnshuffled.length} total products for q='${q}', category='${category}' before shuffle.`);
-
-  const allMatchingProducts = shuffleArray(allMatchingProductsUnshuffled);
-  console.log(`(Client Sim) Shuffled ${allMatchingProducts.length} products.`);
-
+// ─── Client-side wrapper for pagination + shuffling ────────────────
+const searchProducts = async ({
+  q,
+  category,
+  limit,
+  page
+}: {
+  q: string;
+  category?: string | string[];
+  limit: number;
+  page: number;
+}): Promise<{ products: Product[]; total: number }> => {
+  const catParam = Array.isArray(category)
+    ? category.join(",")
+    : category ?? "";
+  const all: Product[] = await originalSearchProducts({
+    q,
+    category: catParam
+  });
+  const shuffled = shuffleArray(all);
   const offset = (page - 1) * limit;
-  const paginatedResults = allMatchingProducts.slice(offset, offset + limit);
-  const total = allMatchingProducts.length;
-
   return {
-    products: paginatedResults,
-    total: total,
+    products: shuffled.slice(offset, offset + limit),
+    total: all.length
   };
 };
 
+// ─── Constants ─────────────────────────────────────────────────────
+const POPULAR_CATEGORIES_SLUGS = [
+  "",
+  "phones-tablets",
+  "laptops",
+  "electronics"
+];
+const PER_PAGE_OPTIONS = [10, 20, 30, 50, 100];
+const DEFAULT_PRODUCTS_PER_PAGE = 30;
+const HEADER_SCROLL_THRESHOLD = 10;
+const SCROLL_TO_TOP_THRESHOLD = 300;
+const DEBOUNCE_DELAY = 2000;
+const DROPDOWN_CLOSE_DELAY = 200;
 
 export default function Home() {
   const router = useRouter();
   const params = useSearchParams();
 
-  const initialQueryFromUrl = useMemo(() => params.get("q") ?? "", [params]);
-  const initialCategoryFromUrl = useMemo(() => params.get("category") ?? "", [params]);
-  const initialPageFromUrl = useMemo(() => Math.max(1, parseInt(params.get("page") ?? "1", 10)), [params]);
-  const initialLimitFromUrl = useMemo(() => {
-    const limitStr = params.get("limit");
-    if (limitStr) {
-      const limitNum = parseInt(limitStr, 10);
-      if (PER_PAGE_OPTIONS.includes(limitNum)) return limitNum;
-    }
-    return DEFAULT_PRODUCTS_PER_PAGE;
+  // ─── URL-derived initial values ───────────────────────────────────
+  const initialQ = useMemo(() => params.get("q") ?? "", [params]);
+  const initialCat = useMemo(() => params.get("category") ?? "", [params]);
+  const initialPage = useMemo(
+    () => Math.max(1, parseInt(params.get("page") ?? "1", 10)),
+    [params]
+  );
+  const initialLimit = useMemo(() => {
+    const l = parseInt(params.get("limit") ?? "", 10);
+    return PER_PAGE_OPTIONS.includes(l) ? l : DEFAULT_PRODUCTS_PER_PAGE;
   }, [params]);
 
+  // ─── UI state ──────────────────────────────────────────────────────
   const [isLoadingApp, setIsLoadingApp] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showScrollToTopButton, setShowScrollToTopButton] = useState(false);
-  const [searchInput, setSearchInput] = useState(initialQueryFromUrl);
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(initialQueryFromUrl);
-  const [products, setProducts] = useState<Product[]>([]); 
+  const [searchInput, setSearchInput] = useState(initialQ);
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(initialQ);
+  const [products, setProducts] = useState<Product[]>([]);
   const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCategorySlug, setSelectedCategorySlug] = useState(initialCategoryFromUrl);
-  const [categories] = useState<Category[]>(MOCK_CATEGORIES);
-  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [isCategoryDropdownVisible, setIsCategoryDropdownVisible] = useState(false);
-  
-  const currentLimit = initialLimitFromUrl;
-  const currentPage = initialPageFromUrl;
 
+  // ─── Category tree + selection state ──────────────────────────────
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoryTree, setCategoryTree] = useState<Record<string, string[]>>(
+    {}
+  );
+  const [selectedCategorySlug, setSelectedCategorySlug] =
+    useState(initialCat);
+  const [expandedCategorySlugs, setExpandedCategorySlugs] = useState<
+    string | string[]
+  >(initialCat || "");
+
+  // ─── Modal/dropdown state & refs ─────────────────────────────────
+  const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
+  const [isCategoryDropdownVisible, setIsCategoryDropdownVisible] =
+    useState(false);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
   const dropdownHoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const displayProducts = products; 
 
-  const popularCategories = useMemo(() => {
-    return MOCK_CATEGORIES.filter(cat => POPULAR_CATEGORIES_SLUGS.includes(cat.slug));
-  }, [MOCK_CATEGORIES]); 
+  // ─── Derived for rendering ─────────────────────────────────────────
+  const currentLimit = initialLimit;
+  const currentPage = initialPage;
+  const displayProducts = products;
+  const popularCategories = useMemo(
+    () => categories.filter(cat =>
+      POPULAR_CATEGORIES_SLUGS.includes(cat.slug)
+    ),
+    [categories]
+  );
 
-  const openFullScreenModal = useCallback(() => { setIsCategoryDropdownVisible(false); setIsCategoryModalOpen(true); }, []);
-  const closeFullScreenModal = useCallback(() => setIsCategoryModalOpen(false), []);
-  const handleDropdownContainerMouseEnter = () => { if (dropdownHoverTimeoutRef.current) clearTimeout(dropdownHoverTimeoutRef.current); setIsCategoryDropdownVisible(true); };
-  const handleDropdownContainerMouseLeave = () => { dropdownHoverTimeoutRef.current = setTimeout(() => setIsCategoryDropdownVisible(false), DROPDOWN_CLOSE_DELAY); };
+  // ─── Handlers ──────────────────────────────────────────────────────
+  const openFullScreenModal = useCallback(() => {
+    setIsCategoryDropdownVisible(false);
+    setIsCategoryModalOpen(true);
+  }, []);
+  const closeFullScreenModal = useCallback(() => {
+    setIsCategoryModalOpen(false);
+  }, []);
 
-  useEffect(() => { const timer = setTimeout(() => setIsLoadingApp(false), 1500); return () => clearTimeout(timer); }, []);
-  useEffect(() => { const handleScroll = () => { const csY = window.scrollY; setIsScrolled(csY > HEADER_SCROLL_THRESHOLD); setShowScrollToTopButton(csY > SCROLL_TO_TOP_THRESHOLD); }; window.addEventListener("scroll", handleScroll); handleScroll(); return () => window.removeEventListener("scroll", handleScroll); }, []);
-  useEffect(() => { const timerId = setTimeout(() => setDebouncedSearchTerm(searchInput), DEBOUNCE_DELAY); return () => clearTimeout(timerId); }, [searchInput]);
+  const handleDropdownContainerMouseEnter = () => {
+    if (dropdownHoverTimeoutRef.current)
+      clearTimeout(dropdownHoverTimeoutRef.current);
+    setIsCategoryDropdownVisible(true);
+  };
+  const handleDropdownContainerMouseLeave = () => {
+    dropdownHoverTimeoutRef.current = setTimeout(
+      () => setIsCategoryDropdownVisible(false),
+      DROPDOWN_CLOSE_DELAY
+    );
+  };
 
-  useEffect(() => { 
-    const currentUrlParams = new URLSearchParams(params.toString());
-    const newUrlParams = new URLSearchParams();
-    if (debouncedSearchTerm) newUrlParams.set("q", debouncedSearchTerm);
-    if (selectedCategorySlug) newUrlParams.set("category", selectedCategorySlug);
-    newUrlParams.set("limit", currentLimit.toString()); 
-    
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) =>
+    setSearchInput(e.target.value);
+  const handleSearchSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setDebouncedSearchTerm(searchInput);
+  };
+
+  const handleCategorySelect = (slug: string) => {
+    setSelectedCategorySlug(slug);
+    if (!slug || !categoryTree) {
+      setExpandedCategorySlugs("");
+    } else {
+      const parent = Object.keys(categoryTree).find(
+        label => label.toLowerCase().replace(/\s+/g, "-") === slug
+      );
+      setExpandedCategorySlugs(parent ? categoryTree[parent] : []);
+    }
+    closeFullScreenModal();
+    setIsCategoryDropdownVisible(false);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    const max = Math.ceil(totalProducts / currentLimit);
+    if (newPage < 1 || newPage > max || newPage === currentPage) return;
+    const p = new URLSearchParams(params.toString());
+    p.set("page", newPage.toString());
+    router.push(`/?${p.toString()}`);
+  };
+
+  const handleLimitChange = (e: ChangeEvent<HTMLSelectElement>) => {
+    const l = parseInt(e.target.value, 10);
+    const p = new URLSearchParams(params.toString());
+    p.set("limit", l.toString());
+    p.delete("page");
+    router.push(`/?${p.toString()}`);
+  };
+
+  const scrollToTop = () =>
+    window.scrollTo({ top: 0, behavior: "smooth" });
+
+  // ─── Pagination helpers ────────────────────────────────────────────
+  const totalPages = Math.max(1, Math.ceil(totalProducts / currentLimit));
+  const isFirstPage = currentPage <= 1;
+  const isLastPage = currentPage >= totalPages;
+  const generatePageNumbers = () => {
+    const nums: (number | string)[] = [];
+    const maxShow = 5;
+    const half = Math.floor(maxShow / 2);
+    if (totalPages <= maxShow + 2) {
+      for (let i = 1; i <= totalPages; i++) nums.push(i);
+    } else {
+      nums.push(1);
+      let start = Math.max(2, currentPage - half);
+      let end = Math.min(totalPages - 1, currentPage + half);
+      if (currentPage - half <= 2) end = maxShow;
+      if (currentPage + half >= totalPages - 1)
+        start = totalPages - maxShow + 1;
+      if (start > 2) nums.push("...");
+      for (let i = start; i <= end; i++) nums.push(i);
+      if (end < totalPages - 1) nums.push("...");
+      nums.push(totalPages);
+    }
+    return nums;
+  };
+
+  // ─── Effects ───────────────────────────────────────────────────────
+
+  // 1️⃣ Loader splash
+  useEffect(() => {
+    const t = setTimeout(() => setIsLoadingApp(false), 1500);
+    return () => clearTimeout(t);
+  }, []);
+
+  // 2️⃣ Header scroll + scroll-to-top button
+  useEffect(() => {
+    const onScroll = () => {
+      const y = window.scrollY;
+      setIsScrolled(y > HEADER_SCROLL_THRESHOLD);
+      setShowScrollToTopButton(y > SCROLL_TO_TOP_THRESHOLD);
+    };
+    window.addEventListener("scroll", onScroll);
+    onScroll();
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
+
+  // 3️⃣ Debounce input
+  useEffect(() => {
+    const t = setTimeout(
+      () => setDebouncedSearchTerm(searchInput),
+      DEBOUNCE_DELAY
+    );
+    return () => clearTimeout(t);
+  }, [searchInput]);
+
+  // 4️⃣ Load category hierarchy
+  useEffect(() => {
+    (async () => {
+      try {
+        const tree = await fetchCategoryTree();
+        setCategoryTree(tree);
+        // after fetching your tree from /api/category-tree
+          const parents: Category[] = Object.keys(tree).map(parentName => ({
+            label: parentName,                               // ← "Fashion & Beauty"
+            slug: parentName.toLowerCase().replace(/\s+/g, "-")  // ← "fashion-beauty"
+          }));
+          setCategories([{ label: "All Categories", slug: "" }, ...parents]);
+      } catch (e) {
+        console.error("Error loading category tree", e);
+        setCategories([{ label: "All Categories", slug: "" }]);
+      }
+    })();
+  }, []);
+
+  // 5️⃣ Sync URL
+  useEffect(() => {
+    const oldP = new URLSearchParams(params.toString());
+    const newP = new URLSearchParams();
+    if (debouncedSearchTerm) newP.set("q", debouncedSearchTerm);
+    if (selectedCategorySlug) newP.set("category", selectedCategorySlug);
+    newP.set("limit", currentLimit.toString());
+
     const prevQ = params.get("q") ?? "";
     const prevCat = params.get("category") ?? "";
-    const prevLimit = params.get("limit") ?? DEFAULT_PRODUCTS_PER_PAGE.toString();
+    const prevLim = params.get("limit") ?? "";
+    const changed =
+      debouncedSearchTerm !== prevQ ||
+      selectedCategorySlug !== prevCat ||
+      currentLimit.toString() !== prevLim;
 
-    const coreFiltersChanged = debouncedSearchTerm !== prevQ || 
-                               selectedCategorySlug !== prevCat ||
-                               currentLimit.toString() !== prevLimit;
-
-    if (!coreFiltersChanged && currentPage > 1) {
-      newUrlParams.set("page", currentPage.toString());
+    if (!changed && currentPage > 1) {
+      newP.set("page", currentPage.toString());
     }
-    
-    const newParamsString = newUrlParams.toString();
-    const sortedOldParams = currentUrlParams.toString().split('&').sort().join('&');
-    const sortedNewParams = newParamsString.split('&').sort().join('&');
 
-    if (sortedNewParams !== sortedOldParams) {
-      router.replace(`/?${newParamsString}`, { scroll: false });
+    const ser = (u: URLSearchParams) =>
+      Array.from(u.entries())
+        .sort()
+        .map(([k, v]) => `${k}=${v}`)
+        .join("&");
+
+    if (ser(oldP) !== ser(newP)) {
+      router.replace(`/?${newP.toString()}`, { scroll: false });
     }
-  }, [debouncedSearchTerm, selectedCategorySlug, currentLimit, currentPage, router, params]);
-  
-  useEffect(() => { 
+  }, [
+    debouncedSearchTerm,
+    selectedCategorySlug,
+    currentLimit,
+    currentPage,
+    router,
+    params
+  ]);
+
+  // 6️⃣ Fetch products
+  useEffect(() => {
     if (isLoadingApp) return;
-    const fetchProductsData = async () => {
+    (async () => {
       setLoading(true);
       setError(null);
       try {
-        const results = await searchProducts({ 
-          q: debouncedSearchTerm, 
-          category: selectedCategorySlug, 
-          limit: currentLimit, 
-          page: currentPage,    
+        const { products, total } = await searchProducts({
+          q: debouncedSearchTerm,
+          category: expandedCategorySlugs,
+          limit: currentLimit,
+          page: currentPage
         });
-        
-        setProducts(results.products || []); 
-        setTotalProducts(results.total || 0);
-
-      } catch (err: any) {
-        setError("Failed to load products: " + (err.message || "Please try again later."));
-        console.error("❌ Error loading products:", err);
+        setProducts(products);
+        setTotalProducts(total);
+      } catch (e: any) {
+        setError("Failed to load products: " + e.message);
         setProducts([]);
         setTotalProducts(0);
       } finally {
         setLoading(false);
       }
-    };
-    fetchProductsData();
+    })();
   }, [
-      debouncedSearchTerm, 
-      selectedCategorySlug, 
-      currentPage, 
-      currentLimit, 
-      isLoadingApp
-    ]);
+    debouncedSearchTerm,
+    expandedCategorySlugs,
+    currentPage,
+    currentLimit,
+    isLoadingApp
+  ]);
 
-  useEffect(() => { 
-    setSearchInput(initialQueryFromUrl);
-    setSelectedCategorySlug(initialCategoryFromUrl);
-  }, [initialQueryFromUrl, initialCategoryFromUrl]);
+  // 7️⃣ Reset on back/forward
+  useEffect(() => {
+    setSearchInput(initialQ);
+    setSelectedCategorySlug(initialCat);
+    setExpandedCategorySlugs(initialCat || "");
+  }, [initialQ, initialCat]);
 
-  useEffect(() => { 
-    const handleMousedown = (event: MouseEvent) => { if (isCategoryModalOpen && modalContentRef.current && !modalContentRef.current.contains(event.target as Node) && moreButtonRef.current && !moreButtonRef.current.contains(event.target as Node) ) { closeFullScreenModal(); } }; 
-    const handleEscapeKey = (event: KeyboardEvent) => { if (event.key === 'Escape' && isCategoryModalOpen) closeFullScreenModal(); }; 
-    if (isCategoryModalOpen) { document.addEventListener('mousedown', handleMousedown); document.addEventListener('keydown', handleEscapeKey); } 
-    return () => { document.removeEventListener('mousedown', handleMousedown); document.removeEventListener('keydown', handleEscapeKey); }; 
-  }, [isCategoryModalOpen, closeFullScreenModal]);
-
-  const handleInputChange = (event: React.ChangeEvent<HTMLInputElement>) => setSearchInput(event.target.value);
-  const handleSearchSubmit = (event: React.FormEvent<HTMLFormElement>) => { event.preventDefault(); setDebouncedSearchTerm(searchInput); };
-  const handleCategorySelect = (slug: string) => { setSelectedCategorySlug(slug); if (isCategoryModalOpen) closeFullScreenModal(); setIsCategoryDropdownVisible(false); };
-  const handlePageChange = (newPage: number) => { const calculatedTotalPages = Math.max(1, Math.ceil(totalProducts / currentLimit)); if (newPage < 1 || (newPage > calculatedTotalPages && newPage !== 1) || newPage === currentPage) return; const newParams = new URLSearchParams(params.toString()); newParams.set("page", newPage.toString()); router.push(`/?${newParams.toString()}`); };
-  const handleLimitChange = (event: ChangeEvent<HTMLSelectElement>) => { const newLimit = parseInt(event.target.value, 10); const newParams = new URLSearchParams(params.toString()); newParams.set("limit", newLimit.toString()); newParams.delete("page"); router.push(`/?${newParams.toString()}`); };
-  const scrollToTop = () => window.scrollTo({ top: 0, behavior: 'smooth' });
-
-  const totalPages = Math.max(1, Math.ceil(totalProducts / currentLimit));
-  const isFirstPage = currentPage <= 1;
-  const isLastPage = currentPage >= totalPages;
-  const generatePageNumbers = () => { const pageNumbers: (number | string)[] = []; const maxPagesToShow = 5; const halfMaxPages = Math.floor(maxPagesToShow / 2); if (totalPages <= 1) return []; if (totalPages <= maxPagesToShow + 2) { for (let i = 1; i <= totalPages; i++) pageNumbers.push(i); } else { pageNumbers.push(1); let startPage = Math.max(2, currentPage - halfMaxPages); let endPage = Math.min(totalPages - 1, currentPage + halfMaxPages); if (currentPage - halfMaxPages <= 2) endPage = Math.min(totalPages - 1, maxPagesToShow); if (currentPage + halfMaxPages >= totalPages - 1) startPage = Math.max(2, totalPages - maxPagesToShow + 1); if (startPage > 2) pageNumbers.push('...'); for (let i = startPage; i <= endPage; i++) pageNumbers.push(i); if (endPage < totalPages - 1) pageNumbers.push('...'); pageNumbers.push(totalPages); } return pageNumbers.filter((item, index, self) => { if (item === '...') { if (self[index - 1] === '...') return false; if (typeof self[index - 1] === 'number' && typeof self[index + 1] === 'number' && (self[index + 1] as number) === (self[index - 1] as number) + 1) return false; } return true; }); };
+  // 8️⃣ Close modal on outside/Esc
+  useEffect(() => {
+    const onDown = (e: MouseEvent) => {
+      if (
+        isCategoryModalOpen &&
+        modalContentRef.current &&
+        !modalContentRef.current.contains(e.target as Node) &&
+        moreButtonRef.current &&
+        !moreButtonRef.current.contains(e.target as Node)
+      ) {
+        setIsCategoryModalOpen(false);
+      }
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isCategoryModalOpen) {
+        setIsCategoryModalOpen(false);
+      }
+    };
+    if (isCategoryModalOpen) {
+      document.addEventListener("mousedown", onDown);
+      document.addEventListener("keydown", onKey);
+    }
+    return () => {
+      document.removeEventListener("mousedown", onDown);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [isCategoryModalOpen]);
 
   if (isLoadingApp) return <AppLoader />;
 
@@ -232,7 +403,7 @@ export default function Home() {
           </form>
           <div className={`flex flex-wrap items-center justify-center transition-all duration-300 ease-in-out ${isScrolled ? 'gap-1.5 sm:gap-2 mt-2.5' : 'gap-2 mt-6'}`}>
             {popularCategories.map((cat) => (
-              <button key={cat.slug} onClick={() => handleCategorySelect(cat.slug)} className={`font-medium rounded-full transition-all duration-300 ease-in-out ${selectedCategorySlug === cat.slug ? "bg-amber-300 text-amber-900 shadow-sm" : "bg-amber-100 text-amber-700 hover:bg-amber-200"} ${isScrolled ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-xs sm:text-sm'}`}>
+              <button key={cat.slug} onClick={() => handleCategorySelect(cat.slug)} className={`font-medium rounded-full transition-all duration-300 ease-in-out ${selectedCategorySlug === cat.label ? "bg-amber-300 text-amber-900 shadow-sm" : "bg-amber-100 text-amber-700 hover:bg-amber-200"} ${isScrolled ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-xs sm:text-sm'}`}>
                 {cat.label}
               </button>
             ))}
@@ -242,7 +413,7 @@ export default function Home() {
                 <ChevronDownIcon className={`transition-transform duration-200 ease-in-out stroke-[2.5] text-amber-600 ${isCategoryDropdownVisible ? 'rotate-180' : 'rotate-0'} ${isScrolled ? 'h-3 w-3' : 'h-3 w-3 sm:h-4 sm:w-4'}`} />
               </button>
               {isCategoryDropdownVisible && (
-                <CategoryDropdown categories={MOCK_CATEGORIES} onSelectCategory={(slug) => { handleCategorySelect(slug); }} onViewAllClick={() => { setIsCategoryDropdownVisible(false); openFullScreenModal(); }} />
+                <CategoryDropdown categories={categories} onSelectCategory={(slug) => { handleCategorySelect(slug); }} onViewAllClick={() => { setIsCategoryDropdownVisible(false); openFullScreenModal(); }} />
               )}
             </div>
           </div>
@@ -259,7 +430,7 @@ export default function Home() {
                     <h2 id="categories-modal-title" className="text-xl font-bold text-gray-800">All Categories</h2>
                     <button onClick={closeFullScreenModal} aria-label="Close categories modal" className="p-1 rounded-md hover:bg-gray-100 transition-colors"><XMarkIcon className="w-6 h-6 text-gray-600" /></button>
                   </div>
-                  { MOCK_CATEGORIES.length === 0 ? (<div className="flex justify-center py-8"><ArrowPathIcon className="h-8 w-8 animate-spin text-gray-400" /></div>) : ( 
+                  { categories.length === 0 ? (<div className="flex justify-center py-8"><ArrowPathIcon className="h-8 w-8 animate-spin text-gray-400" /></div>) : ( 
                     <ul className="space-y-2">{categories.map((cat) => (<li key={cat.slug}><button onClick={() => handleCategorySelect(cat.slug)} className={`block w-full text-left px-3 py-2 rounded-md transition-colors duration-200 ${selectedCategorySlug === cat.slug ? "bg-emerald-100 text-emerald-700 font-semibold" : "text-gray-700 hover:bg-gray-100"}`}>{cat.label}</button></li>))}</ul>
                   )}
                 </div>

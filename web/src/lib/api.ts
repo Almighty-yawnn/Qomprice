@@ -15,7 +15,7 @@ export async function fetchCategories() {
 
 interface SearchProductsParams {
   q?: string;
-  category?: string;
+  category?: string | string[];   // allow an array of slugs
   limit?: number;
   page?: number;
   site_id?: string;
@@ -30,7 +30,13 @@ export async function searchProducts(params: SearchProductsParams): Promise<Prod
   const queryParamsObject: Record<string, string> = {};
 
   if (params.q !== undefined) queryParamsObject.q = params.q;
-  if (params.category !== undefined) queryParamsObject.category = params.category;
+  if (params.category !== undefined) {
+    // if it’s an array, comma-join it
+    const cat = Array.isArray(params.category)
+      ? params.category.join(",")
+      : params.category;
+    queryParamsObject.category = cat;
+  }
   if (params.limit !== undefined) queryParamsObject.limit = String(params.limit);
   if (params.page !== undefined) queryParamsObject.page = String(params.page);
   
@@ -66,4 +72,9 @@ export async function searchProducts(params: SearchProductsParams): Promise<Prod
     console.error("❌ searchProducts() exception:", err);
     return [];
   }
+}
+
+export async function fetchCategoryTree(): Promise<Record<string,string[]>> {
+  const res = await fetch(`${API}/api/category-tree`)
+  return res.ok ? res.json() : {};
 }
