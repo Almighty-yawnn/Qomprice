@@ -17,7 +17,7 @@ router = APIRouter()
 async def get_products(
     q: Optional[str] = Query(None),
     category: Optional[str] = Query(None),
-    limit: int = Query(20, ge=1, le=1000),
+    limit: int = Query(None, ge=1, le=1000),
 ):
     async with db.AsyncSessionLocal() as session:
         if q:

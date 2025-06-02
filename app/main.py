@@ -54,7 +54,7 @@ async def categories(session: AsyncSession = Depends(get_session)):
 async def search(
     q: str | None = None,                 # ⬅ was `q: str`
     category: str | None = None,
-    limit: int = 20,
+    limit: int = None,
     session: AsyncSession = Depends(get_session),
 ):
     stmt = select(Product)
