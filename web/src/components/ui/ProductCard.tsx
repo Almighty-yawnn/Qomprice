@@ -63,8 +63,12 @@ export default function ProductCard({ product, onCompareClick }: ProductCardProp
         return "bg-purple-100 text-purple-700";
       case "shopwice":
         return "bg-green-100 text-green-700";
-      case "istari":
+      case "get4lessghana":
         return "bg-yellow-100 text-yellow-800";
+      case "shaqexpress":
+        return "bg-red-100 text-red-800";
+      case "ishtari":
+        return "bg-violet-100 text-green-800";
       default:
         return "bg-gray-200 text-gray-700";
     }
