@@ -1,8 +1,8 @@
 // src/components/ui/CategoryDropdown.tsx
 import React from 'react';
 import type { Category } from '@/types/product'; // Assuming Category type is here or adjust path
-import Link from 'next/link'; // If you want to use Link for direct navigation,
-                             // but here we'll use a callback for filtering on the same page.
+// import Link from 'next/link'; // If you want to use Link for direct navigation,
+// but here we'll use a callback for filtering on the same page.
 
 interface CategoryDropdownProps {
   categories: Category[];

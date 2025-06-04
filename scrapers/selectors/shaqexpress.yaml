@@ -8,7 +8,7 @@ phones-tablets:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 
@@ -21,7 +21,7 @@ home-office:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 kids-toys:
@@ -33,7 +33,7 @@ kids-toys:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 fashion:
@@ -45,7 +45,7 @@ fashion:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 beauty-health:
@@ -57,7 +57,7 @@ beauty-health:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 groceries:
@@ -69,7 +69,7 @@ groceries:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 pharmacy:
@@ -81,7 +81,7 @@ pharmacy:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 computing:
@@ -93,7 +93,7 @@ computing:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 tv-audio-video:
@@ -105,7 +105,7 @@ tv-audio-video:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 kitchen-dining:
@@ -117,7 +117,7 @@ kitchen-dining:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 sports-fitness:
@@ -129,7 +129,7 @@ sports-fitness:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 games-consoles:
@@ -141,7 +141,7 @@ games-consoles:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 books-stationery:
@@ -153,7 +153,7 @@ books-stationery:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 automobiles:
@@ -165,7 +165,7 @@ automobiles:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 building-construction:
@@ -177,7 +177,7 @@ building-construction:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 machinery-equipment:
@@ -189,7 +189,7 @@ machinery-equipment:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 funerals:
@@ -201,7 +201,7 @@ funerals:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 agriculture-supplies:
@@ -213,7 +213,7 @@ agriculture-supplies:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 25.0     # seconds to wait after each scroll
+    scroll_delay: 10.0     # seconds to wait after each scroll
 
 
 

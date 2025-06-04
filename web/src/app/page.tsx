@@ -1,6 +1,8 @@
 // src/app/page.tsx
 "use client";
 
+import FilterSidebar from '../components/ui/FilterSidebar';
+import { useProductFilters } from '../types/useProductFilters';
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   useEffect,
@@ -15,7 +17,7 @@ import {
   searchProducts as originalSearchProducts,
   fetchCategoryTree
 } from "@/lib/api";
-import type { Product, Category } from "@/types/product";
+import type { Product, Category, VendorListing } from "@/types/product";
 import Link from "next/link";
 import AppLoader from "@/components/ui/AppLoader";
 import CategoryDropdown from "@/components/ui/CategoryDropdown";
@@ -73,13 +75,19 @@ const POPULAR_CATEGORIES_SLUGS = [
   "",
   "phones-tablets",
   "laptops",
-  "electronics"
+  "electronics",
+  "fashion-beauty",
+  "home-garden",
+  "sports-outdoors",
+  "books-media",
+  "automotive",
+  "health-wellness"
 ];
 const PER_PAGE_OPTIONS = [10, 20, 30, 50, 100];
 const DEFAULT_PRODUCTS_PER_PAGE = 30;
 const HEADER_SCROLL_THRESHOLD = 10;
 const SCROLL_TO_TOP_THRESHOLD = 300;
-const DEBOUNCE_DELAY = 2000;
+const DEBOUNCE_DELAY = 750;
 const DROPDOWN_CLOSE_DELAY = 200;
 
 export default function Home() {
@@ -128,10 +136,28 @@ export default function Home() {
   const modalContentRef = useRef<HTMLDivElement>(null);
   const dropdownHoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // ─── Filter ─────────────────────────────────
+  const {
+  filters,
+  filteredProducts,
+  availableBrands,
+  availableTypes,
+  priceRange,
+  updateFilter,
+  clearFilters,
+  hasActiveFilters
+} = useProductFilters(((products || []).filter((p): p is Product & { price: number } => typeof p.price === 'number') as unknown) as import("../types/filters").Product[]);
+
   // ─── Derived for rendering ─────────────────────────────────────────
   const currentLimit = initialLimit;
   const currentPage = initialPage;
-  const displayProducts = products;
+  const displayProducts = useMemo(() => {
+    // Apply filters if any, otherwise show all products
+    if (hasActiveFilters) {
+      return filteredProducts;
+    }
+    return products || [];
+  }, [products, filteredProducts, hasActiveFilters]);
   const popularCategories = useMemo(
     () => categories.filter(cat =>
       POPULAR_CATEGORIES_SLUGS.includes(cat.slug)
@@ -199,6 +225,19 @@ export default function Home() {
 
   const scrollToTop = () =>
     window.scrollTo({ top: 0, behavior: "smooth" });
+  
+const handleBrandChange = (brand: string) => {
+  updateFilter('brands', [brand]);
+};
+
+const handleTypeChange = (type: string) => {
+  updateFilter('productTypes', [type]);
+};
+
+const handlePriceChange = (range: { min: number; max: number }) => {
+  updateFilter('priceRange', range);
+};
+
 
   // ─── Pagination helpers ────────────────────────────────────────────
   const totalPages = Math.max(1, Math.ceil(totalProducts / currentLimit));
@@ -326,8 +365,9 @@ export default function Home() {
         });
         setProducts(products);
         setTotalProducts(total);
-      } catch (e: any) {
-        setError("Failed to load products: " + e.message);
+      } catch (e: unknown) {
+        const message = e instanceof Error ? e.message : String(e);
+        setError("Failed to load products: " + message);
         setProducts([]);
         setTotalProducts(0);
       } finally {
@@ -408,7 +448,15 @@ export default function Home() {
               </button>
             ))}
             <div className="relative" onMouseEnter={handleDropdownContainerMouseEnter} onMouseLeave={handleDropdownContainerMouseLeave}>
-              <button type="button" ref={moreButtonRef} onClick={openFullScreenModal} className={`font-medium rounded-full transition-all duration-300 ease-in-out flex items-center gap-1 bg-amber-100 text-amber-700 hover:bg-amber-200 ${isScrolled ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-xs sm:text-sm'}`} aria-label="More categories" aria-haspopup="true" aria-expanded={isCategoryDropdownVisible || isCategoryModalOpen}>
+              <button
+                type="button"
+                ref={moreButtonRef}
+                onClick={openFullScreenModal}
+                className={`font-medium rounded-full transition-all duration-300 ease-in-out flex items-center gap-1 bg-amber-100 text-amber-700 hover:bg-amber-200 ${isScrolled ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-xs sm:text-sm'}`}
+                aria-label="More categories"
+                aria-haspopup="true"
+                aria-expanded={isCategoryDropdownVisible || isCategoryModalOpen}
+              >
                 <span>More</span>
                 <ChevronDownIcon className={`transition-transform duration-200 ease-in-out stroke-[2.5] text-amber-600 ${isCategoryDropdownVisible ? 'rotate-180' : 'rotate-0'} ${isScrolled ? 'h-3 w-3' : 'h-3 w-3 sm:h-4 sm:w-4'}`} />
               </button>
@@ -419,7 +467,19 @@ export default function Home() {
           </div>
         </div>
       </header>
-      
+      <div className="flex">
+        <FilterSidebar
+          filters={filters}
+          availableBrands={availableBrands}
+          availableTypes={availableTypes}
+          priceRange={priceRange}
+          onBrandChange={handleBrandChange}
+          onTypeChange={handleTypeChange}
+          onPriceChange={handlePriceChange}
+          onClearFilters={clearFilters}
+          hasActiveFilters={hasActiveFilters}
+          productCount={displayProducts.length}
+  />
       <div className="flex-grow"> 
         <div className={`flex-grow w-full`}>
             {isCategoryModalOpen && (
@@ -469,20 +529,27 @@ export default function Home() {
                         return (<div className="bg-yellow-50 text-yellow-700 text-sm p-3 rounded shadow-sm" key={`invalid-product-${Math.random()}`}>Data issue</div>); 
                       }
 
-                      let determinedImageUrl: string | undefined = p.imageUrl;                       
-                      if (!determinedImageUrl && p.listings && p.listings.length > 0 && p.listings[0].image_url) {
-                        determinedImageUrl = p.listings[0].image_url; 
+                      let determinedImageUrl: string | undefined = p.imageUrl as string | undefined;
+                      const listings: VendorListing[] = Array.isArray(p.listings) ? p.listings as VendorListing[] : [];
+                      if (!determinedImageUrl && listings.length > 0 && listings[0].image_url) {
+                        determinedImageUrl = listings[0].image_url;
                       }
 
+                      // Ensure all required Product fields are present
                       const productForCard: Product = {
-                        ...p, 
-                        imageUrl: determinedImageUrl, 
+                        id: p.id,
+                        name: p.name,
+                        price: p.price,
+                        title: (p as Product).title ?? p.name,
+                        listings: (p as Product).listings ?? [],
+                        imageUrl: determinedImageUrl,
+                        seller: (p as Product).seller,
                       };
 
                       return <ProductCard 
-                               key={productForCard.id} 
-                               product={productForCard} 
-                             />;
+                                key={productForCard.id} 
+                                product={productForCard} 
+                              />;
                     })}
                   </div>
                   {totalProducts > 0 && totalPages > 1 && (
@@ -510,6 +577,7 @@ export default function Home() {
       <button onClick={scrollToTop} className={`fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-full shadow-lg z-40 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${showScrollToTopButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`} aria-label="Scroll to top">
         <ArrowUpIcon className="h-6 w-6" />
       </button>
+      </div>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-gray-400">
@@ -524,6 +592,7 @@ export default function Home() {
           <div className="mt-16 border-t border-gray-700 pt-8 text-center"><p className="text-sm">&copy; {currentYear} Komprice Technologies. All Rights Reserved.</p></div>
         </div>
       </footer>
+      
     </main>
-  );
-}
+    );
+  }

@@ -31,7 +31,7 @@ export default function ProductCard({ product, onCompareClick }: ProductCardProp
   const showListingThumbnail =
     mainImageSrc && listingImageSrc && mainImageSrc !== listingImageSrc;
 
-  const handleCompareClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  const handleCompareClick = () => {
     if (onCompareClick) {
       onCompareClick(product);
     }
@@ -81,7 +81,7 @@ export default function ProductCard({ product, onCompareClick }: ProductCardProp
           <span
             className={`inline-block text-[10px] sm:text-xs font-semibold px-2 py-0.5 rounded-full ${getSiteIdStyles(siteIdBadge)}`}
           >
-             {siteIdBadge}
+            {siteIdBadge}
           </span>
         </div>
       )}

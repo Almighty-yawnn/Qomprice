@@ -1,5 +1,20 @@
 #selector/shopwice.yaml
-home-office:
+mobile-phones:
+  url: "https://shopwice.com/product-category/mobile-phones/"
+  item: "div.product-small.box"
+  link: "a"
+  img:  "img"
+  title: "p.name.product-title a"
+  price: "span.price bdi"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 9   # optional
+
+
+home-appliances:
   url: "https://shopwice.com/product-category/home-appliances/"
   item: "div.product-small.box"
   link: "a"
@@ -69,8 +84,47 @@ cameras:
     next_selector: "a.next"  # for next-button
     max_pages: 2   # optional
 
+computer:
+  url: "https://shopwice.com/product-category/computers/"
+  item: "div.product-small.box"
+  link: "a"
+  img:  "img"
+  title: "p.name.product-title a"
+  price: "span.price bdi"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 3   # optional
 
+health-beauty:
+  url: "https://shopwice.com/product-category/health-and-beauty/"
+  item: "div.product-small.box"
+  link: "a"
+  img:  "img"
+  title: "p.name.product-title a"
+  price: "span.price bdi"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 1   # optional
 
+fashion:
+  url: "https://shopwice.com/product-category/fashion/"
+  item: "div.product-small.box"
+  link: "a"
+  img:  "img"
+  title: "p.name.product-title a"
+  price: "span.price bdi"
+  pagination:
+    type: path      # one of: query, path, next
+    param: page      # for query
+    template: "/page/{n}/"  # for path
+    next_selector: "a.next"  # for next-button
+    max_pages: 3   # optional
 
 
 
