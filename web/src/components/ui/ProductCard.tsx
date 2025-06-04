@@ -1,6 +1,9 @@
 // src/components/ui/ProductCard.tsx
 import Image from "next/image";
 import type { Product, VendorListing } from "@/types/product";
+import styles from "./ProductCard.module.css";
+
+import { useState } from 'react';
 
 interface ProductCardProps {
   product: Product;
@@ -24,18 +27,39 @@ export default function ProductCard({ product, onCompareClick }: ProductCardProp
     storeInfo = `Site ID: ${firstListing.site_id}`;
   }
 
-  const siteIdBadge = firstListing?.site_id;
+// Define siteIdBadge for use in the badge rendering
+const siteIdBadge = firstListing?.site_id;
 
-  const mainImageSrc = product.imageUrl || firstListing?.image_url || null;
-  const listingImageSrc = firstListing?.image_url || null;
-  const showListingThumbnail =
-    mainImageSrc && listingImageSrc && mainImageSrc !== listingImageSrc;
+const [showTooltip, setShowTooltip] = useState(false);
+const [tooltipPosition, setTooltipPosition] = useState({ x: 0, y: 0 });
 
-  const handleCompareClick = () => {
-    if (onCompareClick) {
-      onCompareClick(product);
-    }
-  };
+const handleMouseEnter = (e: React.MouseEvent) => {
+  const rect = e.currentTarget.getBoundingClientRect();
+  setTooltipPosition({
+    x: rect.left + rect.width / 2,
+    y: rect.top - 10
+  });
+  setShowTooltip(true);
+};
+
+const handleMouseLeave = () => {
+  setShowTooltip(false);
+};
+
+const handleCompareClick = () => {
+  if (onCompareClick) {
+    onCompareClick(product);
+  }
+};
+
+  // Determine the main image source
+  const mainImageSrc = product.imageUrl || firstListing?.image_url || "";
+
+  // Optionally, determine listing thumbnail image
+  const listingImageSrc = firstListing?.image_url && firstListing.image_url !== mainImageSrc
+    ? firstListing.image_url
+    : undefined;
+  const showListingThumbnail = !!listingImageSrc;
 
   let productUrl = "#";
   if (firstListing?.affiliate_url) {
@@ -146,9 +170,24 @@ export default function ProductCard({ product, onCompareClick }: ProductCardProp
           </div>
         </div>
 
-        <h3 className="text-xs sm:text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.25rem] sm:min-h-[2.5rem] leading-tight group-hover:text-emerald-600">
-          {productName}
-        </h3>
+        <div className="relative">
+          <h3 
+            className="text-xs sm:text-sm font-medium text-gray-800 line-clamp-2 min-h-[2.25rem] sm:min-h-[2.5rem] leading-tight group-hover:text-emerald-600 cursor-pointer"
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
+          >
+            {productName}
+          </h3>
+          {showTooltip && productName.length > 25 && (
+            <div
+              className="product-tooltip relative z-50 bg-gray-900 text-white text-xs px-2 py-1 rounded shadow-lg max-w-xs break-words pointer-events-none tooltip-position"
+              data-x={tooltipPosition.x}
+              data-y={tooltipPosition.y}
+            >
+              {productName}
+            </div>
+          )}
+        </div>
 
         <p className="text-sm sm:text-base font-bold text-gray-900 mt-1">
           {displayCurrency}
