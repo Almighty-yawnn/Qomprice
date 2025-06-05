@@ -1,10 +1,12 @@
+# app/models.py
+
 from sqlalchemy import Column, String, Integer, Float, Boolean, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
 from sqlalchemy.dialects.postgresql import UUID
 from datetime import datetime
 import uuid
 
-from .db import Base  # ✅ use this Base
+from .db import Base
 
 class Category(Base):
     __tablename__ = "category"
@@ -17,8 +19,10 @@ class Product(Base):
 
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     title = Column(String, nullable=False)
-    universal_category_id = Column(ForeignKey("category.id"))
+    universal_category_id = Column(Integer, ForeignKey("category.id"))
     created_at = Column(DateTime, default=datetime.utcnow)
+
+    # The site_id column has been REMOVED from this model
 
     listings = relationship("VendorListing", back_populates="product")
 
@@ -27,7 +31,7 @@ class VendorListing(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     product_id = Column(UUID(as_uuid=True), ForeignKey("product.id"))
-    site_id = Column(String)
+    site_id = Column(String) # The site_id correctly lives here
     site_category_id = Column(String)
     price = Column(Float)
     currency = Column(String, default="GHS")

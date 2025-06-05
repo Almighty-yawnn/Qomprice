@@ -15,9 +15,14 @@ import {
 import ProductCard from "@/components/ui/ProductCard";
 import {
   searchProducts as originalSearchProducts,
-  fetchCategoryTree
+  fetchCategoryTree,
+  fetchMarketplaces
 } from "@/lib/api";
+<<<<<<< HEAD
 import type { Product, Category, VendorListing } from "@/types/product";
+=======
+import type { Product, Category, MarketplaceInfo } from "@/types/product";
+>>>>>>> 24794146e955696fcb1761deafda73604445ca84
 import Link from "next/link";
 import AppLoader from "@/components/ui/AppLoader";
 import CategoryDropdown from "@/components/ui/CategoryDropdown";
@@ -28,12 +33,12 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   ChevronDownIcon,
-  ArrowUpIcon
+  ArrowUpIcon,
 } from "@heroicons/react/24/outline";
 
 const currentYear = new Date().getFullYear();
 
-// ─── Helper: Fisher–Yates shuffle ───────────────────────────────────
+// --- Helper: Fisher–Yates shuffle ---
 function shuffleArray<T>(a: T[]): T[] {
   const arr = [...a];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -43,24 +48,33 @@ function shuffleArray<T>(a: T[]): T[] {
   return arr;
 }
 
-// ─── Client-side wrapper for pagination + shuffling ────────────────
+// --- Client-side wrapper for pagination + shuffling + all filters ---
 const searchProducts = async ({
   q,
   category,
   limit,
-  page
+  page,
+  site_id,
+  minPrice,
+  maxPrice,
 }: {
   q: string;
   category?: string | string[];
   limit: number;
   page: number;
+  site_id?: string;
+  minPrice?: number;
+  maxPrice?: number;
 }): Promise<{ products: Product[]; total: number }> => {
   const catParam = Array.isArray(category)
     ? category.join(",")
     : category ?? "";
   const all: Product[] = await originalSearchProducts({
     q,
-    category: catParam
+    category: catParam,
+    site_id,
+    minPrice,
+    maxPrice,
   });
   const shuffled = shuffleArray(all);
   const offset = (page - 1) * limit;
@@ -70,7 +84,7 @@ const searchProducts = async ({
   };
 };
 
-// ─── Constants ─────────────────────────────────────────────────────
+// --- Constants ---
 const POPULAR_CATEGORIES_SLUGS = [
   "",
   "phones-tablets",
@@ -87,16 +101,24 @@ const PER_PAGE_OPTIONS = [10, 20, 30, 50, 100];
 const DEFAULT_PRODUCTS_PER_PAGE = 30;
 const HEADER_SCROLL_THRESHOLD = 10;
 const SCROLL_TO_TOP_THRESHOLD = 300;
+<<<<<<< HEAD
 const DEBOUNCE_DELAY = 750;
+=======
+const DEBOUNCE_DELAY = 1500;
+>>>>>>> 24794146e955696fcb1761deafda73604445ca84
 const DROPDOWN_CLOSE_DELAY = 200;
+const SIDEBAR_WIDTH_CLASSES = "w-64 sm:w-72";
 
 export default function Home() {
   const router = useRouter();
   const params = useSearchParams();
 
-  // ─── URL-derived initial values ───────────────────────────────────
+  // --- URL-derived initial values ---
   const initialQ = useMemo(() => params.get("q") ?? "", [params]);
   const initialCat = useMemo(() => params.get("category") ?? "", [params]);
+  const initialSiteId = useMemo(() => params.get("site_id") ?? "", [params]);
+  const initialMinPrice = useMemo(() => params.get("min_price") ?? "", [params]);
+  const initialMaxPrice = useMemo(() => params.get("max_price") ?? "", [params]);
   const initialPage = useMemo(
     () => Math.max(1, parseInt(params.get("page") ?? "1", 10)),
     [params]
@@ -106,7 +128,7 @@ export default function Home() {
     return PER_PAGE_OPTIONS.includes(l) ? l : DEFAULT_PRODUCTS_PER_PAGE;
   }, [params]);
 
-  // ─── UI state ──────────────────────────────────────────────────────
+  // --- UI state ---
   const [isLoadingApp, setIsLoadingApp] = useState(true);
   const [isScrolled, setIsScrolled] = useState(false);
   const [showScrollToTopButton, setShowScrollToTopButton] = useState(false);
@@ -117,25 +139,30 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // ─── Category tree + selection state ──────────────────────────────
+  // --- Sidebar & Filter States ---
+  const [isSiteFilterSidebarOpen, setIsSiteFilterSidebarOpen] = useState(false);
+  const [isSiteFilterDropdownOpen, setIsSiteFilterDropdownOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [categoryTree, setCategoryTree] = useState<Record<string, string[]>>(
-    {}
-  );
-  const [selectedCategorySlug, setSelectedCategorySlug] =
-    useState(initialCat);
-  const [expandedCategorySlugs, setExpandedCategorySlugs] = useState<
-    string | string[]
-  >(initialCat || "");
+  const [categoryTree, setCategoryTree] = useState<Record<string, string[]>>({});
+  const [selectedCategorySlug, setSelectedCategorySlug] = useState(initialCat);
+  const [expandedCategorySlugs, setExpandedCategorySlugs] = useState<string | string[]>(initialCat || "");
+  const [marketplaces, setMarketplaces] = useState<MarketplaceInfo[]>([]);
+  const [selectedSiteId, setSelectedSiteId] = useState(initialSiteId);
+  const [isLoadingMarketplaces, setIsLoadingMarketplaces] = useState(true);
+  const [minPrice, setMinPrice] = useState(initialMinPrice);
+  const [maxPrice, setMaxPrice] = useState(initialMaxPrice);
+  const [debouncedMinPrice, setDebouncedMinPrice] = useState(initialMinPrice);
+  const [debouncedMaxPrice, setDebouncedMaxPrice] = useState(initialMaxPrice);
 
-  // ─── Modal/dropdown state & refs ─────────────────────────────────
+  // --- Modal/dropdown state & refs ---
   const [isCategoryModalOpen, setIsCategoryModalOpen] = useState(false);
-  const [isCategoryDropdownVisible, setIsCategoryDropdownVisible] =
-    useState(false);
+  const [isCategoryDropdownVisible, setIsCategoryDropdownVisible] = useState(false);
   const moreButtonRef = useRef<HTMLButtonElement>(null);
   const modalContentRef = useRef<HTMLDivElement>(null);
   const dropdownHoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const siteFilterDropdownRef = useRef<HTMLDivElement>(null);
 
+<<<<<<< HEAD
   // ─── Filter ─────────────────────────────────
   const {
   filters,
@@ -149,6 +176,9 @@ export default function Home() {
 } = useProductFilters(((products || []).filter((p): p is Product & { price: number } => typeof p.price === 'number') as unknown) as import("../types/filters").Product[]);
 
   // ─── Derived for rendering ─────────────────────────────────────────
+=======
+  // --- Derived for rendering ---
+>>>>>>> 24794146e955696fcb1761deafda73604445ca84
   const currentLimit = initialLimit;
   const currentPage = initialPage;
   const displayProducts = useMemo(() => {
@@ -159,12 +189,15 @@ export default function Home() {
     return products || [];
   }, [products, filteredProducts, hasActiveFilters]);
   const popularCategories = useMemo(
-    () => categories.filter(cat =>
-      POPULAR_CATEGORIES_SLUGS.includes(cat.slug)
-    ),
+    () => categories.filter((cat: Category) => POPULAR_CATEGORIES_SLUGS.includes(cat.slug)),
     [categories]
   );
+  const selectedMarketplaceName = useMemo(() => {
+    const selected = marketplaces.find(m => m.site_id === selectedSiteId);
+    return selected ? selected.name : "All Sites";
+  }, [marketplaces, selectedSiteId]);
 
+<<<<<<< HEAD
   // ─── Handlers ──────────────────────────────────────────────────────
   const openFullScreenModal = useCallback(() => {
     setIsCategoryDropdownVisible(false);
@@ -240,9 +273,27 @@ const handlePriceChange = (range: { min: number; max: number }) => {
 
 
   // ─── Pagination helpers ────────────────────────────────────────────
+=======
+  // --- Pagination helpers defined in component scope ---
+>>>>>>> 24794146e955696fcb1761deafda73604445ca84
   const totalPages = Math.max(1, Math.ceil(totalProducts / currentLimit));
   const isFirstPage = currentPage <= 1;
   const isLastPage = currentPage >= totalPages;
+
+  // --- Handlers ---
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => setSearchInput(e.target.value);
+  const handleSearchSubmit = (e: React.FormEvent) => { e.preventDefault(); setDebouncedSearchTerm(searchInput); };
+  const handleCategorySelect = (slug: string) => { setSelectedCategorySlug(slug); if (!slug || !categoryTree) { setExpandedCategorySlugs(""); } else { const parent = Object.keys(categoryTree).find(label => label.toLowerCase().replace(/\s+/g, "-") === slug); setExpandedCategorySlugs(parent ? categoryTree[parent] : []); } closeFullScreenModal(); setIsCategoryDropdownVisible(false); };
+  const handleSiteIdSelect = (siteId: string) => { setSelectedSiteId(siteId); setIsSiteFilterDropdownOpen(false); };
+  const handlePageChange = (newPage: number) => { if (newPage < 1 || newPage > totalPages || newPage === currentPage) return; const p = new URLSearchParams(params.toString()); p.set("page", newPage.toString()); router.push(`/?${p.toString()}`); };
+  const handleLimitChange = (e: ChangeEvent<HTMLSelectElement>) => { const l = parseInt(e.target.value, 10); const p = new URLSearchParams(params.toString()); p.set("limit", l.toString()); p.delete("page"); router.push(`/?${p.toString()}`); };
+  const scrollToTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  const openFullScreenModal = useCallback(() => setIsCategoryModalOpen(true), []);
+  const closeFullScreenModal = useCallback(() => setIsCategoryModalOpen(false), []);
+  const handleDropdownContainerMouseEnter = () => { if (dropdownHoverTimeoutRef.current) clearTimeout(dropdownHoverTimeoutRef.current); setIsCategoryDropdownVisible(true); };
+  const handleDropdownContainerMouseLeave = () => { dropdownHoverTimeoutRef.current = setTimeout(() => setIsCategoryDropdownVisible(false), DROPDOWN_CLOSE_DELAY); };
+  const toggleSiteFilterSidebar = () => { setIsSiteFilterSidebarOpen(prev => !prev); if (isSiteFilterDropdownOpen) setIsSiteFilterDropdownOpen(false); };
+  const toggleSiteFilterDropdown = () => setIsSiteFilterDropdownOpen(prev => !prev);
   const generatePageNumbers = () => {
     const nums: (number | string)[] = [];
     const maxShow = 5;
@@ -254,8 +305,7 @@ const handlePriceChange = (range: { min: number; max: number }) => {
       let start = Math.max(2, currentPage - half);
       let end = Math.min(totalPages - 1, currentPage + half);
       if (currentPage - half <= 2) end = maxShow;
-      if (currentPage + half >= totalPages - 1)
-        start = totalPages - maxShow + 1;
+      if (currentPage + half >= totalPages - 1) start = totalPages - maxShow + 1;
       if (start > 2) nums.push("...");
       for (let i = start; i <= end; i++) nums.push(i);
       if (end < totalPages - 1) nums.push("...");
@@ -264,107 +314,69 @@ const handlePriceChange = (range: { min: number; max: number }) => {
     return nums;
   };
 
-  // ─── Effects ───────────────────────────────────────────────────────
+  // --- Effects ---
+  useEffect(() => { const t = setTimeout(() => setIsLoadingApp(false), 1500); return () => clearTimeout(t); }, []);
 
-  // 1️⃣ Loader splash
+  useEffect(() => { const onScroll = () => { const y = window.scrollY; setIsScrolled(y > HEADER_SCROLL_THRESHOLD); setShowScrollToTopButton(y > SCROLL_TO_TOP_THRESHOLD); }; window.addEventListener("scroll", onScroll); onScroll(); return () => window.removeEventListener("scroll", onScroll); }, []);
+
   useEffect(() => {
-    const t = setTimeout(() => setIsLoadingApp(false), 1500);
-    return () => clearTimeout(t);
-  }, []);
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchInput);
+      setDebouncedMinPrice(minPrice);
+      setDebouncedMaxPrice(maxPrice);
+    }, DEBOUNCE_DELAY);
+    return () => clearTimeout(handler);
+  }, [searchInput, minPrice, maxPrice]);
 
-  // 2️⃣ Header scroll + scroll-to-top button
-  useEffect(() => {
-    const onScroll = () => {
-      const y = window.scrollY;
-      setIsScrolled(y > HEADER_SCROLL_THRESHOLD);
-      setShowScrollToTopButton(y > SCROLL_TO_TOP_THRESHOLD);
-    };
-    window.addEventListener("scroll", onScroll);
-    onScroll();
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  useEffect(() => { (async () => { try { const tree = await fetchCategoryTree(); setCategoryTree(tree); const parents: Category[] = Object.keys(tree).map(name => ({ label: name, slug: name.toLowerCase().replace(/\s+/g, "-") })); setCategories([{ label: "All Categories", slug: "" }, ...parents]); } catch (e) { console.error("Error loading category tree", e); setCategories([{ label: "All Categories", slug: "" }]); } })(); }, []);
 
-  // 3️⃣ Debounce input
-  useEffect(() => {
-    const t = setTimeout(
-      () => setDebouncedSearchTerm(searchInput),
-      DEBOUNCE_DELAY
-    );
-    return () => clearTimeout(t);
-  }, [searchInput]);
-
-  // 4️⃣ Load category hierarchy
   useEffect(() => {
     (async () => {
+      setIsLoadingMarketplaces(true);
       try {
-        const tree = await fetchCategoryTree();
-        setCategoryTree(tree);
-        // after fetching your tree from /api/category-tree
-          const parents: Category[] = Object.keys(tree).map(parentName => ({
-            label: parentName,                               // ← "Fashion & Beauty"
-            slug: parentName.toLowerCase().replace(/\s+/g, "-")  // ← "fashion-beauty"
-          }));
-          setCategories([{ label: "All Categories", slug: "" }, ...parents]);
-      } catch (e) {
-        console.error("Error loading category tree", e);
-        setCategories([{ label: "All Categories", slug: "" }]);
-      }
+        const fetchedMarketplacesFromAPI = await fetchMarketplaces();
+        const CORE_STYLED_SITE_DEFINITIONS = [
+          { site_id: "get4lessghana", defaultName: "GET4LESSGHANA" },
+          { site_id: "telefonika", defaultName: "Telefonika" },
+          { site_id: "myghmarket", defaultName: "MyGHMarket" },
+          { site_id: "shopwice", defaultName: "Shopwice" },
+        ];
+        const finalSiteList: MarketplaceInfo[] = [];
+        const processedSiteIds = new Set<string>();
+        CORE_STYLED_SITE_DEFINITIONS.forEach(coreDef => { const apiMatch = fetchedMarketplacesFromAPI.find(apiSite => apiSite.site_id && apiSite.site_id.toLowerCase() === coreDef.site_id.toLowerCase()); finalSiteList.push(apiMatch || { name: coreDef.defaultName, site_id: coreDef.site_id }); processedSiteIds.add(coreDef.site_id.toLowerCase()); });
+        fetchedMarketplacesFromAPI.forEach(apiSite => { if (apiSite.site_id && !processedSiteIds.has(apiSite.site_id.toLowerCase())) { finalSiteList.push(apiSite); } });
+        finalSiteList.sort((a, b) => a.name.localeCompare(b.name));
+        setMarketplaces([{ name: "All Sites", site_id: "" }, ...finalSiteList]);
+      } catch (e) { console.error("Error loading marketplaces", e); setMarketplaces([{ name: "All Sites", site_id: "" }, { name: "GET4LESSGHANA", site_id: "get4lessghana" }, { name: "Telefonika", site_id: "telefonika" }, { name: "MyGHMarket", site_id: "myghmarket" }, { name: "Shopwice", site_id: "shopwice" }].sort((a,b)=>a.name.localeCompare(b.name))); }
+      finally { setIsLoadingMarketplaces(false); }
     })();
   }, []);
 
-  // 5️⃣ Sync URL
   useEffect(() => {
-    const oldP = new URLSearchParams(params.toString());
-    const newP = new URLSearchParams();
-    if (debouncedSearchTerm) newP.set("q", debouncedSearchTerm);
-    if (selectedCategorySlug) newP.set("category", selectedCategorySlug);
-    newP.set("limit", currentLimit.toString());
+    const newParams = new URLSearchParams();
+    if (debouncedSearchTerm) newParams.set("q", debouncedSearchTerm);
+    if (selectedCategorySlug) newParams.set("category", selectedCategorySlug);
+    if (selectedSiteId) newParams.set("site_id", selectedSiteId);
+    if (debouncedMinPrice) newParams.set("min_price", debouncedMinPrice);
+    if (debouncedMaxPrice) newParams.set("max_price", debouncedMaxPrice);
+    newParams.set("limit", currentLimit.toString());
+    const hasCriticalChange = (debouncedSearchTerm || "") !== (params.get("q") ?? "") || (selectedCategorySlug || "") !== (params.get("category") ?? "") || (selectedSiteId || "") !== (params.get("site_id") ?? "") || (debouncedMinPrice || "") !== (params.get("min_price") ?? "") || (debouncedMaxPrice || "") !== (params.get("max_price") ?? "") || currentLimit.toString() !== (params.get("limit") ?? DEFAULT_PRODUCTS_PER_PAGE.toString());
+    if (!hasCriticalChange && currentPage > 1) { newParams.set("page", currentPage.toString()); }
+    if (newParams.toString() !== params.toString()) { router.replace(`/?${newParams.toString()}`, { scroll: false }); }
+  }, [debouncedSearchTerm, selectedCategorySlug, selectedSiteId, debouncedMinPrice, debouncedMaxPrice, currentLimit, currentPage, router, params]);
 
-    const prevQ = params.get("q") ?? "";
-    const prevCat = params.get("category") ?? "";
-    const prevLim = params.get("limit") ?? "";
-    const changed =
-      debouncedSearchTerm !== prevQ ||
-      selectedCategorySlug !== prevCat ||
-      currentLimit.toString() !== prevLim;
-
-    if (!changed && currentPage > 1) {
-      newP.set("page", currentPage.toString());
-    }
-
-    const ser = (u: URLSearchParams) =>
-      Array.from(u.entries())
-        .sort()
-        .map(([k, v]) => `${k}=${v}`)
-        .join("&");
-
-    if (ser(oldP) !== ser(newP)) {
-      router.replace(`/?${newP.toString()}`, { scroll: false });
-    }
-  }, [
-    debouncedSearchTerm,
-    selectedCategorySlug,
-    currentLimit,
-    currentPage,
-    router,
-    params
-  ]);
-
-  // 6️⃣ Fetch products
   useEffect(() => {
-    if (isLoadingApp) return;
+    if (isLoadingApp || initialLimit === undefined) return;
     (async () => {
       setLoading(true);
       setError(null);
       try {
-        const { products, total } = await searchProducts({
-          q: debouncedSearchTerm,
-          category: expandedCategorySlugs,
-          limit: currentLimit,
-          page: currentPage
-        });
+        const min = parseFloat(debouncedMinPrice);
+        const max = parseFloat(debouncedMaxPrice);
+        const { products, total } = await searchProducts({ q: debouncedSearchTerm, category: expandedCategorySlugs, limit: currentLimit, page: currentPage, site_id: selectedSiteId, minPrice: !isNaN(min) && min >= 0 ? min : undefined, maxPrice: !isNaN(max) && max > 0 ? max : undefined });
         setProducts(products);
         setTotalProducts(total);
+<<<<<<< HEAD
       } catch (e: unknown) {
         const message = e instanceof Error ? e.message : String(e);
         setError("Failed to load products: " + message);
@@ -373,79 +385,96 @@ const handlePriceChange = (range: { min: number; max: number }) => {
       } finally {
         setLoading(false);
       }
+=======
+      } catch (e: any) { setError("Failed to load products: " + e.message); setProducts([]); setTotalProducts(0); }
+      finally { setLoading(false); }
+>>>>>>> 24794146e955696fcb1761deafda73604445ca84
     })();
-  }, [
-    debouncedSearchTerm,
-    expandedCategorySlugs,
-    currentPage,
-    currentLimit,
-    isLoadingApp
-  ]);
+  }, [debouncedSearchTerm, expandedCategorySlugs, selectedSiteId, debouncedMinPrice, debouncedMaxPrice, currentPage, currentLimit, isLoadingApp, initialLimit]);
 
-  // 7️⃣ Reset on back/forward
-  useEffect(() => {
-    setSearchInput(initialQ);
-    setSelectedCategorySlug(initialCat);
-    setExpandedCategorySlugs(initialCat || "");
-  }, [initialQ, initialCat]);
+  useEffect(() => { setSearchInput(initialQ); setSelectedCategorySlug(initialCat); setExpandedCategorySlugs(initialCat || ""); setSelectedSiteId(initialSiteId); setMinPrice(initialMinPrice); setMaxPrice(initialMaxPrice); }, [initialQ, initialCat, initialSiteId, initialMinPrice, initialMaxPrice]);
 
-  // 8️⃣ Close modal on outside/Esc
   useEffect(() => {
-    const onDown = (e: MouseEvent) => {
-      if (
-        isCategoryModalOpen &&
-        modalContentRef.current &&
-        !modalContentRef.current.contains(e.target as Node) &&
-        moreButtonRef.current &&
-        !moreButtonRef.current.contains(e.target as Node)
-      ) {
-        setIsCategoryModalOpen(false);
-      }
+    const handleClickOutside = (event: MouseEvent) => {
+      if (siteFilterDropdownRef.current && !siteFilterDropdownRef.current.contains(event.target as Node)) { setIsSiteFilterDropdownOpen(false); }
+      if (isCategoryModalOpen && modalContentRef.current && !modalContentRef.current.contains(event.target as Node) && moreButtonRef.current && !moreButtonRef.current.contains(event.target as Node)) { setIsCategoryModalOpen(false); }
     };
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isCategoryModalOpen) {
-        setIsCategoryModalOpen(false);
-      }
-    };
-    if (isCategoryModalOpen) {
-      document.addEventListener("mousedown", onDown);
-      document.addEventListener("keydown", onKey);
-    }
-    return () => {
-      document.removeEventListener("mousedown", onDown);
-      document.removeEventListener("keydown", onKey);
-    };
-  }, [isCategoryModalOpen]);
+    const handleEscapeKey = (event: KeyboardEvent) => { if (event.key === "Escape") { if (isSiteFilterDropdownOpen) setIsSiteFilterDropdownOpen(false); if (isCategoryModalOpen) setIsCategoryModalOpen(false); if (isSiteFilterSidebarOpen) setIsSiteFilterSidebarOpen(false); } };
+    document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscapeKey);
+    return () => { document.removeEventListener("mousedown", handleClickOutside); document.removeEventListener("keydown", handleEscapeKey); };
+  }, [isSiteFilterDropdownOpen, isCategoryModalOpen, isSiteFilterSidebarOpen]);
+
+  const getSiteDropdownItemStyles = (siteButtonId?: string, currentSelectedSiteId?: string): string => { const isActive = siteButtonId === currentSelectedSiteId; let baseStyle = "w-full text-left px-4 py-2 text-sm transition-colors duration-150 "; const siteIdLower = siteButtonId?.toLowerCase(); if (isActive) { switch (siteIdLower) { case "get4lessghana": return baseStyle + "bg-orange-500 text-white font-semibold"; case "telefonika": return baseStyle + "bg-blue-500 text-white font-semibold"; case "myghmarket": return baseStyle + "bg-purple-500 text-white font-semibold"; case "shopwice": return baseStyle + "bg-green-500 text-white font-semibold"; default: return baseStyle + "bg-emerald-600 text-white font-semibold"; } } else { switch (siteIdLower) { case "get4lessghana": return baseStyle + "text-orange-700 hover:bg-orange-100"; case "telefonika": return baseStyle + "text-blue-700 hover:bg-blue-100"; case "myghmarket": return baseStyle + "text-purple-700 hover:bg-purple-100"; case "shopwice": return baseStyle + "text-green-700 hover:bg-green-100"; default: return baseStyle + "text-gray-700 hover:bg-gray-100"; } } };
 
   if (isLoadingApp) return <AppLoader />;
 
+  const sidebarMarginPx = isSiteFilterSidebarOpen ? (SIDEBAR_WIDTH_CLASSES.includes('sm:w-72') ? 288 : 256) : 0;
+
   return (
     <main className="min-h-screen bg-gray-100 text-gray-800 flex flex-col">
-      {/* Header */}
-      <header
-        className={`text-gray-100 sticky top-0 z-50 shadow-lg rounded-b-2xl transition-all duration-300 ease-in-out bg-gradient-to-r from-emerald-700 via-green-500 to-lime-400 bg-[length:200%_auto] animate-gradient-flow`}
-      >
-        <div className={`flex items-center justify-between px-4 sm:px-6 max-w-7xl mx-auto transition-all duration-300 ease-in-out ${isScrolled ? 'py-2.5' : 'py-4'}`}>
-          <h1 className={`font-bold tracking-tight transition-all duration-300 ease-in-out ${isScrolled ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>
-            <Link href="/" className="hover:text-white">Komprice</Link>
-          </h1>
-          {/* MODIFIED: "About" link nav is now always flex */}
-          <nav className={`flex items-center transition-all duration-300 ease-in-out ${isScrolled ? 'gap-4 text-xs sm:text-sm' : 'gap-6 text-sm'}`}>
-            <Link href="/about" className="hover:underline hover:text-white">About</Link>
-          </nav>
+      <button onClick={toggleSiteFilterSidebar} className={`fixed top-1/3 transform -translate-y-1/2 z-[75] p-2 bg-emerald-600 text-white rounded-r-lg shadow-lg hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 transition-all duration-300 ease-in-out`} style={{ left: isSiteFilterSidebarOpen ? `${sidebarMarginPx}px` : '0px' }} aria-label={isSiteFilterSidebarOpen ? "Close site filters" : "Open site filters"} aria-expanded={isSiteFilterSidebarOpen} aria-controls="site-filter-sidebar">
+        {isSiteFilterSidebarOpen ? <ChevronLeftIcon className="h-5 w-5 sm:h-6 sm:w-6" /> : <ChevronRightIcon className="h-5 w-5 sm:h-6 sm:w-6" />}
+      </button>
+
+      {isSiteFilterSidebarOpen && <div className="fixed inset-0 bg-black/40 z-[65] md:hidden" onClick={toggleSiteFilterSidebar} aria-hidden="true" />}
+      
+      <aside id="site-filter-sidebar" className={`fixed top-0 left-0 h-full bg-white border-r border-gray-200 shadow-xl z-[70] transition-transform duration-300 ease-in-out flex flex-col ${SIDEBAR_WIDTH_CLASSES} ${isSiteFilterSidebarOpen ? "translate-x-0" : "-translate-x-full"}`} aria-labelledby="site-filter-sidebar-title">
+        <div className="flex items-center justify-between p-4 border-b border-gray-200">
+          <h2 id="site-filter-sidebar-title" className="text-lg font-semibold text-gray-800">Filters</h2>
+          <button onClick={toggleSiteFilterSidebar} className="p-1 text-gray-500 hover:text-gray-800 rounded-md hover:bg-gray-100"><XMarkIcon className="h-6 w-6" /></button>
         </div>
-        <div className={`px-4 sm:px-6 mx-auto transition-all duration-300 ease-in-out ${isScrolled ? 'pb-3 max-w-3xl' : 'pb-8 max-w-4xl'}`}>
-          <form onSubmit={handleSearchSubmit} className="flex items-center relative">
-            <input type="text" name="q_input" value={searchInput} onChange={handleInputChange} placeholder={isScrolled ? "Search..." : "Search for products, deals, or stores..."} className={`w-full border rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all duration-300 ease-in-out placeholder-gray-500 text-gray-900 border-gray-300 ${isScrolled ? 'pl-3 pr-12 py-2 text-sm' : 'pl-4 pr-16 py-3 text-base'}`} />
-            <button type="submit" className={`absolute right-0 top-1/2 transform -translate-y-1/2 bg-yellow-400 hover:bg-yellow-500 text-emerald-900 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${isScrolled ? 'h-8 w-8 sm:h-9 sm:w-9 hover:scale-105' : 'h-10 w-10 sm:h-12 sm:w-12 hover:scale-110'}`} aria-label="Search">
-              <MagnifyingGlassIcon className={`transition-all duration-300 ease-in-out stroke-[2.5] ${isScrolled ? 'h-4 w-4 sm:h-5 sm:w-5' : 'h-5 w-5 sm:h-6 sm:w-6'}`} />
+        
+        <nav className="flex-grow p-3 space-y-4 overflow-y-auto">
+          <div className="relative" ref={siteFilterDropdownRef}>
+            <h3 className="text-sm font-medium text-gray-500 mb-1.5 px-1">Filter by Site</h3>
+            <button type="button" onClick={toggleSiteFilterDropdown} className="w-full flex items-center justify-between text-left px-3 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500" aria-haspopup="listbox" aria-expanded={isSiteFilterDropdownOpen}>
+              <span className="truncate">{selectedMarketplaceName}</span>
+              <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isSiteFilterDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
-          </form>
-          <div className={`flex flex-wrap items-center justify-center transition-all duration-300 ease-in-out ${isScrolled ? 'gap-1.5 sm:gap-2 mt-2.5' : 'gap-2 mt-6'}`}>
-            {popularCategories.map((cat) => (
-              <button key={cat.slug} onClick={() => handleCategorySelect(cat.slug)} className={`font-medium rounded-full transition-all duration-300 ease-in-out ${selectedCategorySlug === cat.label ? "bg-amber-300 text-amber-900 shadow-sm" : "bg-amber-100 text-amber-700 hover:bg-amber-200"} ${isScrolled ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-xs sm:text-sm'}`}>
-                {cat.label}
+            {isSiteFilterDropdownOpen && (
+              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto focus:outline-none">
+                {isLoadingMarketplaces ? (<div className="p-4 flex justify-center"><ArrowPathIcon className="h-5 w-5 animate-spin" /></div>) : (marketplaces.map((site) => (<button key={site.site_id || 'all-sites-dropdown'} onClick={() => handleSiteIdSelect(site.site_id)} className={getSiteDropdownItemStyles(site.site_id, selectedSiteId)} role="option" aria-selected={selectedSiteId === site.site_id}>{site.name}</button>)))}
+              </div>
+            )}
+          </div>
+
+          <div className="relative">
+             <h3 className="text-sm font-medium text-gray-500 mb-1.5 px-1">Filter by Price (GHS)</h3>
+             <div className="flex items-center space-x-2">
+                <div className="relative flex-1">
+                  <label htmlFor="min-price" className="sr-only">Minimum Price</label>
+                  <input type="number" id="min-price" name="min-price" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="Min" className="w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm py-2 px-3" aria-label="Minimum price" />
+                </div>
+                <div className="text-gray-400">-</div>
+                <div className="relative flex-1">
+                  <label htmlFor="max-price" className="sr-only">Maximum Price</label>
+                  <input type="number" id="max-price" name="max-price" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Max" className="w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm py-2 px-3" aria-label="Maximum price" />
+                </div>
+             </div>
+          </div>
+        </nav>
+      </aside>
+
+      <div className={`flex flex-col flex-grow transition-all duration-300 ease-in-out ${isSiteFilterSidebarOpen ? `md:ml-${SIDEBAR_WIDTH_CLASSES.split(' ')[1].substring(3)}` : ''}`}>
+        <header
+          className={`text-gray-100 sticky top-0 z-50 shadow-lg rounded-b-2xl transition-all duration-300 ease-in-out bg-gradient-to-r from-emerald-700 via-green-500 to-lime-400 bg-[length:200%_auto] animate-gradient-flow`}
+        >
+          <div className={`flex items-center justify-between px-4 sm:px-6 max-w-7xl mx-auto transition-all duration-300 ease-in-out ${isScrolled ? 'py-2.5' : 'py-4'}`}>
+            <h1 className={`font-bold tracking-tight transition-all duration-300 ease-in-out ${isScrolled ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>
+              <Link href="/" className="hover:text-white">Komprice</Link>
+            </h1>
+            <nav className={`flex items-center transition-all duration-300 ease-in-out ${isScrolled ? 'gap-4 text-xs sm:text-sm' : 'gap-6 text-sm'}`}>
+              <Link href="/about" className="hover:underline hover:text-white">About</Link>
+            </nav>
+          </div>
+          <div className={`px-4 sm:px-6 mx-auto transition-all duration-300 ease-in-out ${isScrolled ? 'pb-3 max-w-3xl' : 'pb-8 max-w-4xl'}`}>
+            <form onSubmit={handleSearchSubmit} className="flex items-center relative">
+              <input type="text" name="q_input" value={searchInput} onChange={handleInputChange} placeholder={isScrolled ? "Search..." : "Search for products, deals, or stores..."} className={`w-full border rounded-full focus:outline-none focus:ring-2 focus:ring-emerald-400 transition-all duration-300 ease-in-out placeholder-gray-500 text-gray-900 border-gray-300 ${isScrolled ? 'pl-3 pr-12 py-2 text-sm' : 'pl-4 pr-16 py-3 text-base'}`} />
+              <button type="submit" className={`absolute right-0 top-1/2 transform -translate-y-1/2 bg-yellow-400 hover:bg-yellow-500 text-emerald-900 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${isScrolled ? 'h-8 w-8 sm:h-9 sm:w-9 hover:scale-105' : 'h-10 w-10 sm:h-12 sm:w-12 hover:scale-110'}`} aria-label="Search">
+                <MagnifyingGlassIcon className={`transition-all duration-300 ease-in-out stroke-[2.5] ${isScrolled ? 'h-4 w-4 sm:h-5 sm:w-5' : 'h-5 w-5 sm:h-6 sm:w-6'}`} />
               </button>
+<<<<<<< HEAD
             ))}
             <div className="relative" onMouseEnter={handleDropdownContainerMouseEnter} onMouseLeave={handleDropdownContainerMouseLeave}>
               <button
@@ -481,16 +510,38 @@ const handlePriceChange = (range: { min: number; max: number }) => {
           productCount={displayProducts.length}
   />
       <div className="flex-grow"> 
+=======
+            </form>
+            <div className={`flex flex-wrap items-center justify-center transition-all duration-300 ease-in-out ${isScrolled ? 'gap-1.5 sm:gap-2 mt-2.5' : 'gap-2 mt-6'}`}>
+              {popularCategories.map((cat) => (
+                <button key={cat.slug} onClick={() => handleCategorySelect(cat.slug)} className={`font-medium rounded-full transition-all duration-300 ease-in-out ${selectedCategorySlug === cat.slug ? "bg-amber-300 text-amber-900 shadow-sm" : "bg-amber-100 text-amber-700 hover:bg-amber-200"} ${isScrolled ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-xs sm:text-sm'}`}>
+                  {cat.label}
+                </button>
+              ))}
+              <div className="relative" onMouseEnter={handleDropdownContainerMouseEnter} onMouseLeave={handleDropdownContainerMouseLeave}>
+                <button type="button" ref={moreButtonRef} onClick={openFullScreenModal} className={`font-medium rounded-full transition-all duration-300 ease-in-out flex items-center gap-1 bg-amber-100 text-amber-700 hover:bg-amber-200 ${isScrolled ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-xs sm:text-sm'}`} aria-label="More categories" aria-haspopup="true" aria-expanded={isCategoryDropdownVisible || isCategoryModalOpen}>
+                  <span>More</span>
+                  <ChevronDownIcon className={`transition-transform duration-200 ease-in-out stroke-[2.5] text-amber-600 ${isCategoryDropdownVisible ? 'rotate-180' : 'rotate-0'} ${isScrolled ? 'h-3 w-3' : 'h-3 w-3 sm:h-4 sm:w-4'}`} />
+                </button>
+                {isCategoryDropdownVisible && (
+                  <CategoryDropdown categories={categories} onSelectCategory={(slug) => { handleCategorySelect(slug); }} onViewAllClick={() => { setIsCategoryDropdownVisible(false); openFullScreenModal(); }} />
+                )}
+              </div>
+            </div>
+          </div>
+        </header>
+        
+>>>>>>> 24794146e955696fcb1761deafda73604445ca84
         <div className={`flex-grow w-full`}>
             {isCategoryModalOpen && (
-              <div className="fixed inset-0 z-[60] flex items-center justify-center px-4 py-6" aria-modal="true" role="dialog" aria-labelledby="categories-modal-title">
+              <div className="fixed inset-0 z-[80] flex items-center justify-center px-4 py-6" aria-modal="true" role="dialog" aria-labelledby="categories-modal-title">
                 <div className="absolute inset-0 bg-black/60 transition-opacity duration-300 ease-in-out" aria-hidden="true" onClick={closeFullScreenModal} />
                 <div ref={modalContentRef} className="relative bg-white rounded-lg shadow-xl max-w-sm w-full max-h-[90vh] overflow-y-auto p-6 transform transition-transform duration-300 ease-in-out">
-                  <div className="flex items-center justify-between mb-6 border-b pb-4">
+                  <div className="flex items-center justify-between mb-6 border-b border-gray-200 pb-4">
                     <h2 id="categories-modal-title" className="text-xl font-bold text-gray-800">All Categories</h2>
                     <button onClick={closeFullScreenModal} aria-label="Close categories modal" className="p-1 rounded-md hover:bg-gray-100 transition-colors"><XMarkIcon className="w-6 h-6 text-gray-600" /></button>
                   </div>
-                  { categories.length === 0 ? (<div className="flex justify-center py-8"><ArrowPathIcon className="h-8 w-8 animate-spin text-gray-400" /></div>) : ( 
+                  { !categories || categories.length === 0 ? (<div className="flex justify-center py-8"><ArrowPathIcon className="h-8 w-8 animate-spin text-gray-400" /></div>) : (
                     <ul className="space-y-2">{categories.map((cat) => (<li key={cat.slug}><button onClick={() => handleCategorySelect(cat.slug)} className={`block w-full text-left px-3 py-2 rounded-md transition-colors duration-200 ${selectedCategorySlug === cat.slug ? "bg-emerald-100 text-emerald-700 font-semibold" : "text-gray-700 hover:bg-gray-100"}`}>{cat.label}</button></li>))}</ul>
                   )}
                 </div>
@@ -502,7 +553,7 @@ const handlePriceChange = (range: { min: number; max: number }) => {
                   {totalProducts > 0 && displayProducts.length > 0 ? (
                     <span>Showing {((currentPage - 1) * currentLimit) + 1} - {Math.min(currentPage * currentLimit, totalProducts)} of {totalProducts} results</span>
                   ) : totalProducts === 0 && !loading ? (
-                     <span>No products found.</span>
+                     <span>No products found. { (debouncedSearchTerm || selectedCategorySlug || selectedSiteId || minPrice || maxPrice) && "Try adjusting your filters."}</span>
                   ): (
                     <span>&nbsp;</span>
                   )}
@@ -516,19 +567,19 @@ const handlePriceChange = (range: { min: number; max: number }) => {
               </div>
               {loading && <div className="flex justify-center py-16"><ArrowPathIcon className="h-10 w-10 animate-spin text-emerald-500" /></div>}
               {!loading && error && (<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md mx-auto" role="alert"><strong className="font-bold">Error!</strong> <span className="block sm:inline">{error}</span></div>)}
-              {!loading && !error && displayProducts.length === 0 && products.length === 0 && totalProducts === 0 && !debouncedSearchTerm && !selectedCategorySlug && (<div className="text-center py-16"><p className="text-xl text-gray-600 mb-4">Welcome to Komprice!</p><p className="text-gray-500 text-sm">Use the search bar or categories to find products.</p></div>)}
-              {!loading && !error && displayProducts.length === 0 && (debouncedSearchTerm || selectedCategorySlug) && (<div className="text-center py-16"><p className="text-xl text-gray-600 mb-4">No products found for your current search.</p><p className="text-gray-500 text-sm">Try a different search term or category.</p></div>)}
-              
+              {!loading && !error && displayProducts.length === 0 && products.length === 0 && totalProducts === 0 && !debouncedSearchTerm && !selectedCategorySlug && !selectedSiteId && !minPrice && !maxPrice && (<div className="text-center py-16"><p className="text-xl text-gray-600 mb-4">Welcome to Komprice!</p><p className="text-gray-500 text-sm">Use the search bar or categories to find products.</p></div>)}
+              {!loading && !error && displayProducts.length === 0 && (debouncedSearchTerm || selectedCategorySlug || selectedSiteId || minPrice || maxPrice) && (<div className="text-center py-16"><p className="text-xl text-gray-600 mb-4">No products found for your current selection.</p><p className="text-gray-500 text-sm">Try a different search term or adjusting your filters.</p></div>)}
+
               {!loading && !error && displayProducts.length > 0 && (
                 <>
-                  {/* MODIFIED: Grid columns for mobile */}
-                  <div className="grid grid-cols-3 gap-4 md:grid-cols-4 md:gap-6 lg:grid-cols-5">
-                    {displayProducts.map((p) => { 
-                      if (!p || typeof p.id === 'undefined') { 
-                        console.warn(`Product object is invalid`, p); 
-                        return (<div className="bg-yellow-50 text-yellow-700 text-sm p-3 rounded shadow-sm" key={`invalid-product-${Math.random()}`}>Data issue</div>); 
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4 md:grid-cols-4 md:gap-6 lg:grid-cols-5">
+                    {displayProducts.map((p) => {
+                      if (!p || typeof p.id === 'undefined') {
+                        console.warn(`Product object is invalid`, p);
+                        return (<div className="bg-yellow-50 text-yellow-700 text-sm p-3 rounded shadow-sm" key={`invalid-product-${Math.random()}`}>Data issue</div>);
                       }
 
+<<<<<<< HEAD
                       let determinedImageUrl: string | undefined = p.imageUrl as string | undefined;
                       const listings: VendorListing[] = Array.isArray(p.listings) ? p.listings as VendorListing[] : [];
                       if (!determinedImageUrl && listings.length > 0 && listings[0].image_url) {
@@ -550,6 +601,15 @@ const handlePriceChange = (range: { min: number; max: number }) => {
                                 key={productForCard.id} 
                                 product={productForCard} 
                               />;
+=======
+                      let determinedImageUrl: string | undefined = p.imageUrl;
+                      if (!determinedImageUrl && p.listings && p.listings.length > 0 && p.listings[0].image_url) {
+                        determinedImageUrl = p.listings[0].image_url;
+                      }
+
+                      const productForCard: Product = { ...p, imageUrl: determinedImageUrl };
+                      return <ProductCard key={productForCard.id} product={productForCard} />;
+>>>>>>> 24794146e955696fcb1761deafda73604445ca84
                     })}
                   </div>
                   {totalProducts > 0 && totalPages > 1 && (
@@ -569,26 +629,32 @@ const handlePriceChange = (range: { min: number; max: number }) => {
               {!loading && !error && displayProducts.length === 0 && products.length > 0 && currentPage > 1 && (
                 <div className="text-center py-8"><p className="text-lg text-gray-600">No products found on this page.</p><button onClick={() => handlePageChange(1)} className="mt-2 text-sm text-emerald-600 hover:underline">Go to first page</button></div>
               )}
-            </section>
+          </section>
         </div>
-      </div>
 
+<<<<<<< HEAD
       {/* Scroll to Top Button */}
       <button onClick={scrollToTop} className={`fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-full shadow-lg z-40 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${showScrollToTopButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`} aria-label="Scroll to top">
         <ArrowUpIcon className="h-6 w-6" />
       </button>
       </div>
+=======
+        <button onClick={scrollToTop} className={`fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-full shadow-lg z-40 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${showScrollToTopButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`} aria-label="Scroll to top">
+          <ArrowUpIcon className="h-6 w-6" />
+        </button>
+>>>>>>> 24794146e955696fcb1761deafda73604445ca84
 
-      {/* Footer */}
-      <footer className="bg-gray-900 text-gray-400">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 xl:gap-12">
-            <div className="md:col-span-2 lg:col-span-1"><Link href="/" className="inline-block mb-6"><h2 className="text-3xl font-bold text-white">Komprice</h2></Link><p className="text-sm mb-6 leading-relaxed">Komprice helps you find the best deals by comparing prices from thousands of stores. Shop smarter, save bigger, every day.</p><div className="flex space-x-4"><a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors duration-200"><span className="sr-only">Facebook</span><svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg></a><a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors duration-200"><span className="sr-only">Twitter</span><svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg></a><a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors duration-200"><span className="sr-only">Instagram</span><svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.498 3.72c.636-.247 1.363.416 2.427.465C8.95 2.013 9.304 2 12.315 2zm-1.161 1.043c-1.061.048-1.685.198-2.226.406A3.897 3.897 0 006.17 4.715a3.897 3.897 0 00-1.256 2.226c-.208.54-.358 1.165-.406 2.226-.048 1.052-.059 1.363-.059 3.803 0 2.44.011 2.751.059 3.803.048 1.061.198 1.685.406 2.226a3.897 3.897 0 001.256 2.226 3.897 3.897 0 002.226 1.256c.54.208 1.165.358 2.226.406 1.052.048 1.363.059 3.803.059 2.44 0 2.751-.011 3.803-.059.975-.045 1.704-.19 2.299-.403a3.742 3.742 0 001.316-1.261 3.739 3.739 0 001.261-1.316c.213-.595.358-1.324.403-2.299.045-1.052.056-1.363.056-3.803 0-2.44-.011-2.751-.056-3.803-.045-.975-.19-1.704-.403-2.299a3.742 3.742 0 00-1.261-1.316 3.739 3.739 0 00-1.316-1.261c-.595-.213-1.324-.358-2.299-.403C15.08 3.056 14.769 3.045 12.315 3.045zm0 2.427a6.36 6.36 0 110 12.72 6.36 6.36 0 010-12.72zM12 15.06a3.06 3.06 0 100-6.12 3.06 3.06 0 000 6.12z" clipRule="evenodd" /></svg></a></div></div>
-            {/* Other footer links */}
-            <div><h3 className="text-sm font-semibold text-gray-100 tracking-wider uppercase mb-5">Explore</h3><ul className="space-y-3"><li><Link href="/about" className="hover:text-emerald-400 transition-colors duration-200">About Us</Link></li><li><Link href="/how-it-works" className="hover:text-emerald-400 transition-colors duration-200">How It Works</Link></li><li><Link href="/categories" className="hover:text-emerald-400 transition-colors duration-200">Browse All Categories</Link></li><li><Link href="/blog" className="hover:text-emerald-400 transition-colors duration-200">Our Blog</Link></li><li><Link href="/deals" className="hover:text-emerald-400 transition-colors duration-200">Today's Deals</Link></li></ul></div>
-            <div><h3 className="text-sm font-semibold text-gray-100 tracking-wider uppercase mb-5">Support</h3><ul className="space-y-3"><li><Link href="/help-center" className="hover:text-emerald-400 transition-colors duration-200">Help Center</Link></li><li><Link href="/help-center#faqs" className="hover:text-emerald-400 transition-colors duration-200">FAQs</Link></li><li><Link href="/contact" className="hover:text-emerald-400 transition-colors duration-200">Contact Us</Link></li><li><Link href="/sitemap" className="hover:text-emerald-400 transition-colors duration-200">Sitemap</Link></li></ul></div>
-            <div><h3 className="text-sm font-semibold text-gray-100 tracking-wider uppercase mb-5">Legal</h3><ul className="space-y-3"><li><Link href="/terms-of-use" className="hover:text-emerald-400 transition-colors duration-200">Terms of Use</Link></li><li><Link href="/privacy-policy" className="hover:text-emerald-400 transition-colors duration-200">Privacy Policy</Link></li><li><Link href="/cookie-policy" className="hover:text-emerald-400 transition-colors duration-200">Cookie Policy</Link></li><li><Link href="/accessibility-statement" className="hover:text-emerald-400 transition-colors duration-200">Accessibility</Link></li></ul></div>
+        <footer className="bg-gray-900 text-gray-400">
+           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 xl:gap-12">
+              <div className="md:col-span-2 lg:col-span-1"><Link href="/" className="inline-block mb-6"><h2 className="text-3xl font-bold text-white">Komprice</h2></Link><p className="text-sm mb-6 leading-relaxed">Komprice helps you find the best deals by comparing prices from thousands of stores. Shop smarter, save bigger, every day.</p><div className="flex space-x-4"><a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors duration-200"><span className="sr-only">Facebook</span><svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg></a><a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors duration-200"><span className="sr-only">Twitter</span><svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg></a><a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors duration-200"><span className="sr-only">Instagram</span><svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.498 3.72c.636-.247 1.363.416 2.427.465C8.95 2.013 9.304 2 12.315 2zm-1.161 1.043c-1.061.048-1.685.198-2.226.406A3.897 3.897 0 006.17 4.715a3.897 3.897 0 00-1.256 2.226c-.208.54-.358 1.165-.406 2.226-.048 1.052-.059 1.363-.059 3.803 0 2.44.011 2.751.059 3.803.048 1.061.198 1.685.406 2.226a3.897 3.897 0 001.256 2.226 3.897 3.897 0 002.226 1.256c.54.208 1.165.358 2.226.406 1.052.048 1.363.059 3.803.059 2.44 0 2.751-.011 3.803-.059.975-.045 1.704-.19 2.299-.403a3.742 3.742 0 001.316-1.261 3.739 3.739 0 001.261-1.316c.213-.595.358-1.324.403-2.299.045-1.052.056-1.363.056-3.803 0-2.44-.011-2.751-.056-3.803-.045-.975-.19-1.704-.403-2.299a3.742 3.742 0 00-1.261-1.316 3.739 3.739 0 00-1.316-1.261c-.595-.213-1.324-.358-2.299-.403C15.08 3.056 14.769 3.045 12.315 3.045zm0 2.427a6.36 6.36 0 110 12.72 6.36 6.36 0 010-12.72zM12 15.06a3.06 3.06 0 100-6.12 3.06 3.06 0 000 6.12z" clipRule="evenodd" /></svg></a></div></div>
+              <div><h3 className="text-sm font-semibold text-gray-100 tracking-wider uppercase mb-5">Explore</h3><ul className="space-y-3"><li><Link href="/about" className="hover:text-emerald-400 transition-colors duration-200">About Us</Link></li><li><Link href="/how-it-works" className="hover:text-emerald-400 transition-colors duration-200">How It Works</Link></li><li><Link href="/categories" className="hover:text-emerald-400 transition-colors duration-200">Browse All Categories</Link></li><li><Link href="/blog" className="hover:text-emerald-400 transition-colors duration-200">Our Blog</Link></li><li><Link href="/deals" className="hover:text-emerald-400 transition-colors duration-200">Today's Deals</Link></li></ul></div>
+              <div><h3 className="text-sm font-semibold text-gray-100 tracking-wider uppercase mb-5">Support</h3><ul className="space-y-3"><li><Link href="/help-center" className="hover:text-emerald-400 transition-colors duration-200">Help Center</Link></li><li><Link href="/help-center#faqs" className="hover:text-emerald-400 transition-colors duration-200">FAQs</Link></li><li><Link href="/contact" className="hover:text-emerald-400 transition-colors duration-200">Contact Us</Link></li><li><Link href="/sitemap" className="hover:text-emerald-400 transition-colors duration-200">Sitemap</Link></li></ul></div>
+              <div><h3 className="text-sm font-semibold text-gray-100 tracking-wider uppercase mb-5">Legal</h3><ul className="space-y-3"><li><Link href="/terms-of-use" className="hover:text-emerald-400 transition-colors duration-200">Terms of Use</Link></li><li><Link href="/privacy-policy" className="hover:text-emerald-400 transition-colors duration-200">Privacy Policy</Link></li><li><Link href="/cookie-policy" className="hover:text-emerald-400 transition-colors duration-200">Cookie Policy</Link></li><li><Link href="/accessibility-statement" className="hover:text-emerald-400 transition-colors duration-200">Accessibility</Link></li></ul></div>
+            </div>
+            <div className="mt-16 border-t border-gray-700 pt-8 text-center"><p className="text-sm">&copy; {currentYear} Komprice Technologies. All Rights Reserved.</p></div>
           </div>
+<<<<<<< HEAD
           <div className="mt-16 border-t border-gray-700 pt-8 text-center"><p className="text-sm">&copy; {currentYear} Komprice Technologies. All Rights Reserved.</p></div>
         </div>
       </footer>
@@ -596,3 +662,10 @@ const handlePriceChange = (range: { min: number; max: number }) => {
     </main>
     );
   }
+=======
+        </footer>
+      </div>
+    </main>
+  );
+}
+>>>>>>> 24794146e955696fcb1761deafda73604445ca84

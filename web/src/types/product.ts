@@ -27,6 +27,11 @@ export interface Product {
 
 // Other types like Category, DynamicFilterOption, AvailableDynamicFilters, SelectedDynamicFilters
 // can remain as they were in the previous complete file I sent.
+export interface MarketplaceInfo {
+  site_id: string; // This should match the ID used for filtering (e.g., VendorListing.site_id)
+  name: string;    // This is the human-readable name for display in the filter dropdown
+}
+
 export interface Category {
   label: string;
   slug: string;

@@ -1,61 +1,71 @@
+# app/main.py
+
 from fastapi import FastAPI, Depends, HTTPException
-from .db import AsyncSessionLocal, engine, Base
-from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List
+from .db import AsyncSession # Removed AsyncSessionLocal as it's not directly used here
 from contextlib import asynccontextmanager
-from . import crud, schemas
+from . import crud, schemas, db # <<< IMPORT 'db' TO ACCESS get_session
 from app.api import products 
 from app.api.category_tree import router as cat_tree_router
 from app.api import seed as seed_module
-from sqlalchemy import select      #  ⬅️  add this line
+from sqlalchemy import select
 from app.models import Product, Category
 from fastapi.middleware.cors import CORSMiddleware
 
-
-
-# from .crud import search_products, list_categories
-# from .schemas import CategoryOut
-from app.crud import list_categories           # ⬅ add this line
-from app.schemas import CategoryOut            # ⬅ and this
+from app.crud import list_categories
+from app.schemas import CategoryOut, MarketplaceInfo # <<< IMPORT MarketplaceInfo
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
+    async with db.engine.begin() as conn: # Use db.engine
+        await conn.run_sync(db.Base.metadata.create_all) # Use db.Base
     yield
 
 app = FastAPI(title="Komprice API", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # ✅ Add your frontend URL here
+    allow_origins=["http://localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-async def get_session() -> AsyncSession:
-    async with AsyncSessionLocal() as session:
-        yield session
+# The 'get_session' function has been MOVED to app/db.py and is DELETED from this file.
 
 
+# --- /api/sites endpoint ---
+@app.get("/api/sites", response_model=List[schemas.MarketplaceInfo])
+async def get_sites_endpoint():
+    """
+    Returns a list of available marketplace sites.
+    """
+    return [
+        {"name": "Jumia", "site_id": "jumia"},
+        {"name": "Telefonika", "site_id": "telefonika"},
+        {"name": "MyGHMarket", "site_id": "myghmarket"},
+        {"name": "Shopwice", "site_id": "shopwice"},
+        {"name": "Istari", "site_id": "istari"},
+    ]
 
 
-
-# …
-@app.get("/categories", response_model=list[CategoryOut])
-async def categories(session: AsyncSession = Depends(get_session)):
+@app.get("/categories", response_model=List[CategoryOut])
+async def categories_endpoint(session: AsyncSession = Depends(db.get_session)): # <<< UPDATED
     slugs = await list_categories(session)
     return [{"slug": s} for s in slugs]
 
 
-
-
-@app.get("/search", response_model=list[schemas.ProductOut])
-async def search(
-    q: str | None = None,                 # ⬅ was `q: str`
+@app.get("/search", response_model=List[schemas.ProductOut])
+async def search_endpoint(
+    q: str | None = None,
     category: str | None = None,
+<<<<<<< HEAD
     limit: int = None,
     session: AsyncSession = Depends(get_session),
+=======
+    limit: int = 20,
+    session: AsyncSession = Depends(db.get_session), # <<< UPDATED
+>>>>>>> 24794146e955696fcb1761deafda73604445ca84
 ):
     stmt = select(Product)
 
@@ -72,10 +82,6 @@ async def search(
     return result.scalars().all()
 
 
-
-
-
 app.include_router(products.router, prefix="/api")
-app.include_router(seed_module.router)  # ✅ add this
-
+app.include_router(seed_module.router)
 app.include_router(cat_tree_router, prefix="/api")
