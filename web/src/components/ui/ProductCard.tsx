@@ -55,7 +55,7 @@ export default function ProductCard({ product, onCompareClick }: ProductCardProp
   // Function to determine badge color based on site ID
   const getSiteIdStyles = (siteId: string | undefined) => {
     switch (siteId?.toLowerCase()) {
-      case "jumia":
+      case "get4lessghana":
         return "bg-orange-100 text-orange-700";
       case "telefonika":
         return "bg-blue-100 text-blue-700";
