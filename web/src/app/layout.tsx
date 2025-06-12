@@ -11,8 +11,8 @@ const sora = Sora({
 });
 
 export const metadata: Metadata = {
-  title: "Komprice",
-  description: "Your amazing Komprice website",
+  title: "Qomprice - Compare Products",
+  description: "Your amazing Qomprice - Compare Products",
   // Add other common meta tags here if needed, e.g., viewport if not automatically handled
   // viewport: 'width=device-width, initial-scale=1', (Though Next.js usually adds this)
 };

@@ -270,7 +270,12 @@ export default function Home() {
         const { products, total } = await searchProducts({ q: debouncedSearchTerm, category: expandedCategorySlugs, limit: currentLimit, page: currentPage, site_id: selectedSiteId, minPrice: !isNaN(min) && min >= 0 ? min : undefined, maxPrice: !isNaN(max) && max > 0 ? max : undefined });
         setProducts(products);
         setTotalProducts(total);
-      } catch (e: any) { setError("Failed to load products: " + e.message); setProducts([]); setTotalProducts(0); }
+      } catch (e: unknown) { 
+        const errorMessage = e instanceof Error ? e.message : String(e);
+        setError("Failed to load products: " + errorMessage); 
+        setProducts([]); 
+        setTotalProducts(0); 
+      }
       finally { setLoading(false); }
     })();
   }, [debouncedSearchTerm, expandedCategorySlugs, selectedSiteId, debouncedMinPrice, debouncedMaxPrice, currentPage, currentLimit, isLoadingApp, initialLimit]);
@@ -323,8 +328,8 @@ export default function Home() {
           </div>
 
           <div className="relative">
-             <h3 className="text-sm font-medium text-gray-500 mb-1.5 px-1">Filter by Price (GHS)</h3>
-             <div className="flex items-center space-x-2">
+            <h3 className="text-sm font-medium text-gray-500 mb-1.5 px-1">Filter by Price (GHS)</h3>
+            <div className="flex items-center space-x-2">
                 <div className="relative flex-1">
                   <label htmlFor="min-price" className="sr-only">Minimum Price</label>
                   <input type="number" id="min-price" name="min-price" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="Min" className="w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm py-2 px-3" aria-label="Minimum price" />
@@ -334,7 +339,7 @@ export default function Home() {
                   <label htmlFor="max-price" className="sr-only">Maximum Price</label>
                   <input type="number" id="max-price" name="max-price" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Max" className="w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm py-2 px-3" aria-label="Maximum price" />
                 </div>
-             </div>
+            </div>
           </div>
         </nav>
       </aside>
@@ -345,7 +350,7 @@ export default function Home() {
         >
           <div className={`flex items-center justify-between px-4 sm:px-6 max-w-7xl mx-auto transition-all duration-300 ease-in-out ${isScrolled ? 'py-2.5' : 'py-4'}`}>
             <h1 className={`font-bold tracking-tight transition-all duration-300 ease-in-out ${isScrolled ? 'text-xl sm:text-2xl' : 'text-2xl sm:text-3xl'}`}>
-              <Link href="/" className="hover:text-white">Komprice</Link>
+              <Link href="/" className="hover:text-white">QomPrice</Link>
             </h1>
             <nav className={`flex items-center transition-all duration-300 ease-in-out ${isScrolled ? 'gap-4 text-xs sm:text-sm' : 'gap-6 text-sm'}`}>
               <Link href="/about" className="hover:underline hover:text-white">About</Link>
@@ -398,7 +403,7 @@ export default function Home() {
                   {totalProducts > 0 && displayProducts.length > 0 ? (
                     <span>Showing {((currentPage - 1) * currentLimit) + 1} - {Math.min(currentPage * currentLimit, totalProducts)} of {totalProducts} results</span>
                   ) : totalProducts === 0 && !loading ? (
-                     <span>No products found. { (debouncedSearchTerm || selectedCategorySlug || selectedSiteId || minPrice || maxPrice) && "Try adjusting your filters."}</span>
+                    <span>No products found. { (debouncedSearchTerm || selectedCategorySlug || selectedSiteId || minPrice || maxPrice) && "Try adjusting your filters."}</span>
                   ): (
                     <span>&nbsp;</span>
                   )}
@@ -412,7 +417,7 @@ export default function Home() {
               </div>
               {loading && <div className="flex justify-center py-16"><ArrowPathIcon className="h-10 w-10 animate-spin text-emerald-500" /></div>}
               {!loading && error && (<div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative max-w-md mx-auto" role="alert"><strong className="font-bold">Error!</strong> <span className="block sm:inline">{error}</span></div>)}
-              {!loading && !error && displayProducts.length === 0 && products.length === 0 && totalProducts === 0 && !debouncedSearchTerm && !selectedCategorySlug && !selectedSiteId && !minPrice && !maxPrice && (<div className="text-center py-16"><p className="text-xl text-gray-600 mb-4">Welcome to Komprice!</p><p className="text-gray-500 text-sm">Use the search bar or categories to find products.</p></div>)}
+              {!loading && !error && displayProducts.length === 0 && products.length === 0 && totalProducts === 0 && !debouncedSearchTerm && !selectedCategorySlug && !selectedSiteId && !minPrice && !maxPrice && (<div className="text-center py-16"><p className="text-xl text-gray-600 mb-4">Welcome to Qomprice!</p><p className="text-gray-500 text-sm">Use the search bar or categories to find products.</p></div>)}
               {!loading && !error && displayProducts.length === 0 && (debouncedSearchTerm || selectedCategorySlug || selectedSiteId || minPrice || maxPrice) && (<div className="text-center py-16"><p className="text-xl text-gray-600 mb-4">No products found for your current selection.</p><p className="text-gray-500 text-sm">Try a different search term or adjusting your filters.</p></div>)}
 
               {!loading && !error && displayProducts.length > 0 && (
@@ -458,14 +463,14 @@ export default function Home() {
         </button>
 
         <footer className="bg-gray-900 text-gray-400">
-           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 xl:gap-12">
-              <div className="md:col-span-2 lg:col-span-1"><Link href="/" className="inline-block mb-6"><h2 className="text-3xl font-bold text-white">Komprice</h2></Link><p className="text-sm mb-6 leading-relaxed">Komprice helps you find the best deals by comparing prices from thousands of stores. Shop smarter, save bigger, every day.</p><div className="flex space-x-4"><a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors duration-200"><span className="sr-only">Facebook</span><svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg></a><a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors duration-200"><span className="sr-only">Twitter</span><svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg></a><a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors duration-200"><span className="sr-only">Instagram</span><svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.498 3.72c.636-.247 1.363.416 2.427.465C8.95 2.013 9.304 2 12.315 2zm-1.161 1.043c-1.061.048-1.685.198-2.226.406A3.897 3.897 0 006.17 4.715a3.897 3.897 0 00-1.256 2.226c-.208.54-.358 1.165-.406 2.226-.048 1.052-.059 1.363-.059 3.803 0 2.44.011 2.751.059 3.803.048 1.061.198 1.685.406 2.226a3.897 3.897 0 001.256 2.226 3.897 3.897 0 002.226 1.256c.54.208 1.165.358 2.226.406 1.052.048 1.363.059 3.803.059 2.44 0 2.751-.011 3.803-.059.975-.045 1.704-.19 2.299-.403a3.742 3.742 0 001.316-1.261 3.739 3.739 0 001.261-1.316c.213-.595.358-1.324.403-2.299.045-1.052.056-1.363.056-3.803 0-2.44-.011-2.751-.056-3.803-.045-.975-.19-1.704-.403-2.299a3.742 3.742 0 00-1.261-1.316 3.739 3.739 0 00-1.316-1.261c-.595-.213-1.324-.358-2.299-.403C15.08 3.056 14.769 3.045 12.315 3.045zm0 2.427a6.36 6.36 0 110 12.72 6.36 6.36 0 010-12.72zM12 15.06a3.06 3.06 0 100-6.12 3.06 3.06 0 000 6.12z" clipRule="evenodd" /></svg></a></div></div>
+              <div className="md:col-span-2 lg:col-span-1"><Link href="/" className="inline-block mb-6"><h2 className="text-3xl font-bold text-white">Qomprice</h2></Link><p className="text-sm mb-6 leading-relaxed">Qomprice helps you find the best deals by comparing prices from thousands of stores. Shop smarter, save bigger, every day.</p><div className="flex space-x-4"><a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors duration-200"><span className="sr-only">Facebook</span><svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" /></svg></a><a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors duration-200"><span className="sr-only">Twitter</span><svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" /></svg></a><a href="#" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-white transition-colors duration-200"><span className="sr-only">Instagram</span><svg className="h-6 w-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true"><path fillRule="evenodd" d="M12.315 2c2.43 0 2.784.013 3.808.06 1.064.049 1.791.218 2.427.465a4.902 4.902 0 011.772 1.153 4.902 4.902 0 011.153 1.772c.247.636.416 1.363.465 2.427.048 1.024.06 1.378.06 3.808s-.012 2.784-.06 3.808c-.049 1.064-.218 1.791-.465 2.427a4.902 4.902 0 01-1.153 1.772 4.902 4.902 0 01-1.772 1.153c-.636.247-1.363.416-2.427.465-1.024.048-1.378.06-3.808.06s-2.784-.012-3.808-.06c-1.064-.049-1.791-.218-2.427-.465a4.902 4.902 0 01-1.772-1.153 4.902 4.902 0 01-1.153-1.772c-.247-.636-.416-1.363-.465-2.427-.048-1.024-.06-1.378-.06-3.808s.012-2.784.06-3.808c.049-1.064.218-1.791.465-2.427a4.902 4.902 0 011.153-1.772A4.902 4.902 0 015.498 3.72c.636-.247 1.363.416 2.427.465C8.95 2.013 9.304 2 12.315 2zm-1.161 1.043c-1.061.048-1.685.198-2.226.406A3.897 3.897 0 006.17 4.715a3.897 3.897 0 00-1.256 2.226c-.208.54-.358 1.165-.406 2.226-.048 1.052-.059 1.363-.059 3.803 0 2.44.011 2.751.059 3.803.048 1.061.198 1.685.406 2.226a3.897 3.897 0 001.256 2.226 3.897 3.897 0 002.226 1.256c.54.208 1.165.358 2.226.406 1.052.048 1.363.059 3.803.059 2.44 0 2.751-.011 3.803-.059.975-.045 1.704-.19 2.299-.403a3.742 3.742 0 001.316-1.261 3.739 3.739 0 001.261-1.316c.213-.595.358-1.324.403-2.299.045-1.052.056-1.363.056-3.803 0-2.44-.011-2.751-.056-3.803-.045-.975-.19-1.704-.403-2.299a3.742 3.742 0 00-1.261-1.316 3.739 3.739 0 00-1.316-1.261c-.595-.213-1.324-.358-2.299-.403C15.08 3.056 14.769 3.045 12.315 3.045zm0 2.427a6.36 6.36 0 110 12.72 6.36 6.36 0 010-12.72zM12 15.06a3.06 3.06 0 100-6.12 3.06 3.06 0 000 6.12z" clipRule="evenodd" /></svg></a></div></div>
               <div><h3 className="text-sm font-semibold text-gray-100 tracking-wider uppercase mb-5">Explore</h3><ul className="space-y-3"><li><Link href="/about" className="hover:text-emerald-400 transition-colors duration-200">About Us</Link></li><li><Link href="/how-it-works" className="hover:text-emerald-400 transition-colors duration-200">How It Works</Link></li><li><Link href="/categories" className="hover:text-emerald-400 transition-colors duration-200">Browse All Categories</Link></li><li><Link href="/blog" className="hover:text-emerald-400 transition-colors duration-200">Our Blog</Link></li><li><Link href="/deals" className="hover:text-emerald-400 transition-colors duration-200">Today's Deals</Link></li></ul></div>
               <div><h3 className="text-sm font-semibold text-gray-100 tracking-wider uppercase mb-5">Support</h3><ul className="space-y-3"><li><Link href="/help-center" className="hover:text-emerald-400 transition-colors duration-200">Help Center</Link></li><li><Link href="/help-center#faqs" className="hover:text-emerald-400 transition-colors duration-200">FAQs</Link></li><li><Link href="/contact" className="hover:text-emerald-400 transition-colors duration-200">Contact Us</Link></li><li><Link href="/sitemap" className="hover:text-emerald-400 transition-colors duration-200">Sitemap</Link></li></ul></div>
               <div><h3 className="text-sm font-semibold text-gray-100 tracking-wider uppercase mb-5">Legal</h3><ul className="space-y-3"><li><Link href="/terms-of-use" className="hover:text-emerald-400 transition-colors duration-200">Terms of Use</Link></li><li><Link href="/privacy-policy" className="hover:text-emerald-400 transition-colors duration-200">Privacy Policy</Link></li><li><Link href="/cookie-policy" className="hover:text-emerald-400 transition-colors duration-200">Cookie Policy</Link></li><li><Link href="/accessibility-statement" className="hover:text-emerald-400 transition-colors duration-200">Accessibility</Link></li></ul></div>
             </div>
-            <div className="mt-16 border-t border-gray-700 pt-8 text-center"><p className="text-sm">&copy; {currentYear} Komprice Technologies. All Rights Reserved.</p></div>
+            <div className="mt-16 border-t border-gray-700 pt-8 text-center"><p className="text-sm">&copy; {currentYear} Qomprice Technologies. All Rights Reserved.</p></div>
           </div>
         </footer>
       </div>

@@ -6,7 +6,7 @@ const AppLoader = () => {
     <div className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-gray-900 bg-opacity-80 backdrop-blur-sm transition-opacity duration-300 ease-in-out">
       <h1 className="mb-6 text-6xl sm:text-7xl md:text-8xl font-extrabold tracking-tight">
         <span className="bg-gradient-to-r from-lime-400 via-green-500 to-emerald-700 bg-clip-text text-transparent">
-          Komprice
+          QomPrice
         </span>
       </h1>
       <div className="w-3/4 sm:w-1/2 md:w-1/3 max-w-xs h-2.5 sm:h-3 bg-gray-700 rounded-full overflow-hidden shadow-inner">
