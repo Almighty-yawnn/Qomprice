@@ -1,7 +1,6 @@
 // src/components/ui/ProductCard.tsx
 import Image from "next/image";
 import type { Product, VendorListing } from "@/types/product";
-import styles from "./ProductCard.module.css";
 
 import { useState } from 'react';
 

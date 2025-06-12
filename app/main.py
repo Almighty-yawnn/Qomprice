@@ -59,13 +59,8 @@ async def categories_endpoint(session: AsyncSession = Depends(db.get_session)): 
 async def search_endpoint(
     q: str | None = None,
     category: str | None = None,
-<<<<<<< HEAD
-    limit: int = None,
-    session: AsyncSession = Depends(get_session),
-=======
     limit: int = 20,
     session: AsyncSession = Depends(db.get_session), # <<< UPDATED
->>>>>>> 24794146e955696fcb1761deafda73604445ca84
 ):
     stmt = select(Product)
 

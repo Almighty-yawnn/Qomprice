@@ -1,8 +1,6 @@
 // src/app/page.tsx
 "use client";
 
-import FilterSidebar from '../components/ui/FilterSidebar';
-import { useProductFilters } from '../types/useProductFilters';
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   useEffect,
@@ -18,11 +16,7 @@ import {
   fetchCategoryTree,
   fetchMarketplaces
 } from "@/lib/api";
-<<<<<<< HEAD
-import type { Product, Category, VendorListing } from "@/types/product";
-=======
 import type { Product, Category, MarketplaceInfo } from "@/types/product";
->>>>>>> 24794146e955696fcb1761deafda73604445ca84
 import Link from "next/link";
 import AppLoader from "@/components/ui/AppLoader";
 import CategoryDropdown from "@/components/ui/CategoryDropdown";
@@ -101,11 +95,7 @@ const PER_PAGE_OPTIONS = [10, 20, 30, 50, 100];
 const DEFAULT_PRODUCTS_PER_PAGE = 30;
 const HEADER_SCROLL_THRESHOLD = 10;
 const SCROLL_TO_TOP_THRESHOLD = 300;
-<<<<<<< HEAD
-const DEBOUNCE_DELAY = 750;
-=======
 const DEBOUNCE_DELAY = 1500;
->>>>>>> 24794146e955696fcb1761deafda73604445ca84
 const DROPDOWN_CLOSE_DELAY = 200;
 const SIDEBAR_WIDTH_CLASSES = "w-64 sm:w-72";
 
@@ -162,32 +152,14 @@ export default function Home() {
   const dropdownHoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const siteFilterDropdownRef = useRef<HTMLDivElement>(null);
 
-<<<<<<< HEAD
-  // ─── Filter ─────────────────────────────────
-  const {
-  filters,
-  filteredProducts,
-  availableBrands,
-  availableTypes,
-  priceRange,
-  updateFilter,
-  clearFilters,
-  hasActiveFilters
-} = useProductFilters(((products || []).filter((p): p is Product & { price: number } => typeof p.price === 'number') as unknown) as import("../types/filters").Product[]);
-
-  // ─── Derived for rendering ─────────────────────────────────────────
-=======
   // --- Derived for rendering ---
->>>>>>> 24794146e955696fcb1761deafda73604445ca84
   const currentLimit = initialLimit;
   const currentPage = initialPage;
+  // If you want to support extra client-side filtering, define hasActiveFilters and filteredProducts here.
+  // For now, just use products directly.
   const displayProducts = useMemo(() => {
-    // Apply filters if any, otherwise show all products
-    if (hasActiveFilters) {
-      return filteredProducts;
-    }
     return products || [];
-  }, [products, filteredProducts, hasActiveFilters]);
+  }, [products]);
   const popularCategories = useMemo(
     () => categories.filter((cat: Category) => POPULAR_CATEGORIES_SLUGS.includes(cat.slug)),
     [categories]
@@ -197,85 +169,7 @@ export default function Home() {
     return selected ? selected.name : "All Sites";
   }, [marketplaces, selectedSiteId]);
 
-<<<<<<< HEAD
-  // ─── Handlers ──────────────────────────────────────────────────────
-  const openFullScreenModal = useCallback(() => {
-    setIsCategoryDropdownVisible(false);
-    setIsCategoryModalOpen(true);
-  }, []);
-  const closeFullScreenModal = useCallback(() => {
-    setIsCategoryModalOpen(false);
-  }, []);
-
-  const handleDropdownContainerMouseEnter = () => {
-    if (dropdownHoverTimeoutRef.current)
-      clearTimeout(dropdownHoverTimeoutRef.current);
-    setIsCategoryDropdownVisible(true);
-  };
-  const handleDropdownContainerMouseLeave = () => {
-    dropdownHoverTimeoutRef.current = setTimeout(
-      () => setIsCategoryDropdownVisible(false),
-      DROPDOWN_CLOSE_DELAY
-    );
-  };
-
-  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) =>
-    setSearchInput(e.target.value);
-  const handleSearchSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    setDebouncedSearchTerm(searchInput);
-  };
-
-  const handleCategorySelect = (slug: string) => {
-    setSelectedCategorySlug(slug);
-    if (!slug || !categoryTree) {
-      setExpandedCategorySlugs("");
-    } else {
-      const parent = Object.keys(categoryTree).find(
-        label => label.toLowerCase().replace(/\s+/g, "-") === slug
-      );
-      setExpandedCategorySlugs(parent ? categoryTree[parent] : []);
-    }
-    closeFullScreenModal();
-    setIsCategoryDropdownVisible(false);
-  };
-
-  const handlePageChange = (newPage: number) => {
-    const max = Math.ceil(totalProducts / currentLimit);
-    if (newPage < 1 || newPage > max || newPage === currentPage) return;
-    const p = new URLSearchParams(params.toString());
-    p.set("page", newPage.toString());
-    router.push(`/?${p.toString()}`);
-  };
-
-  const handleLimitChange = (e: ChangeEvent<HTMLSelectElement>) => {
-    const l = parseInt(e.target.value, 10);
-    const p = new URLSearchParams(params.toString());
-    p.set("limit", l.toString());
-    p.delete("page");
-    router.push(`/?${p.toString()}`);
-  };
-
-  const scrollToTop = () =>
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  
-const handleBrandChange = (brand: string) => {
-  updateFilter('brands', [brand]);
-};
-
-const handleTypeChange = (type: string) => {
-  updateFilter('productTypes', [type]);
-};
-
-const handlePriceChange = (range: { min: number; max: number }) => {
-  updateFilter('priceRange', range);
-};
-
-
-  // ─── Pagination helpers ────────────────────────────────────────────
-=======
   // --- Pagination helpers defined in component scope ---
->>>>>>> 24794146e955696fcb1761deafda73604445ca84
   const totalPages = Math.max(1, Math.ceil(totalProducts / currentLimit));
   const isFirstPage = currentPage <= 1;
   const isLastPage = currentPage >= totalPages;
@@ -376,19 +270,8 @@ const handlePriceChange = (range: { min: number; max: number }) => {
         const { products, total } = await searchProducts({ q: debouncedSearchTerm, category: expandedCategorySlugs, limit: currentLimit, page: currentPage, site_id: selectedSiteId, minPrice: !isNaN(min) && min >= 0 ? min : undefined, maxPrice: !isNaN(max) && max > 0 ? max : undefined });
         setProducts(products);
         setTotalProducts(total);
-<<<<<<< HEAD
-      } catch (e: unknown) {
-        const message = e instanceof Error ? e.message : String(e);
-        setError("Failed to load products: " + message);
-        setProducts([]);
-        setTotalProducts(0);
-      } finally {
-        setLoading(false);
-      }
-=======
       } catch (e: any) { setError("Failed to load products: " + e.message); setProducts([]); setTotalProducts(0); }
       finally { setLoading(false); }
->>>>>>> 24794146e955696fcb1761deafda73604445ca84
     })();
   }, [debouncedSearchTerm, expandedCategorySlugs, selectedSiteId, debouncedMinPrice, debouncedMaxPrice, currentPage, currentLimit, isLoadingApp, initialLimit]);
 
@@ -405,7 +288,7 @@ const handlePriceChange = (range: { min: number; max: number }) => {
     return () => { document.removeEventListener("mousedown", handleClickOutside); document.removeEventListener("keydown", handleEscapeKey); };
   }, [isSiteFilterDropdownOpen, isCategoryModalOpen, isSiteFilterSidebarOpen]);
 
-  const getSiteDropdownItemStyles = (siteButtonId?: string, currentSelectedSiteId?: string): string => { const isActive = siteButtonId === currentSelectedSiteId; let baseStyle = "w-full text-left px-4 py-2 text-sm transition-colors duration-150 "; const siteIdLower = siteButtonId?.toLowerCase(); if (isActive) { switch (siteIdLower) { case "get4lessghana": return baseStyle + "bg-orange-500 text-white font-semibold"; case "telefonika": return baseStyle + "bg-blue-500 text-white font-semibold"; case "myghmarket": return baseStyle + "bg-purple-500 text-white font-semibold"; case "shopwice": return baseStyle + "bg-green-500 text-white font-semibold"; default: return baseStyle + "bg-emerald-600 text-white font-semibold"; } } else { switch (siteIdLower) { case "get4lessghana": return baseStyle + "text-orange-700 hover:bg-orange-100"; case "telefonika": return baseStyle + "text-blue-700 hover:bg-blue-100"; case "myghmarket": return baseStyle + "text-purple-700 hover:bg-purple-100"; case "shopwice": return baseStyle + "text-green-700 hover:bg-green-100"; default: return baseStyle + "text-gray-700 hover:bg-gray-100"; } } };
+  const getSiteDropdownItemStyles = (siteButtonId?: string, currentSelectedSiteId?: string): string => { const isActive = siteButtonId === currentSelectedSiteId; const baseStyle = "w-full text-left px-4 py-2 text-sm transition-colors duration-150 "; const siteIdLower = siteButtonId?.toLowerCase(); if (isActive) { switch (siteIdLower) { case "get4lessghana": return baseStyle + "bg-orange-500 text-white font-semibold"; case "telefonika": return baseStyle + "bg-blue-500 text-white font-semibold"; case "myghmarket": return baseStyle + "bg-purple-500 text-white font-semibold"; case "shopwice": return baseStyle + "bg-green-500 text-white font-semibold"; default: return baseStyle + "bg-emerald-600 text-white font-semibold"; } } else { switch (siteIdLower) { case "get4lessghana": return baseStyle + "text-orange-700 hover:bg-orange-100"; case "telefonika": return baseStyle + "text-blue-700 hover:bg-blue-100"; case "myghmarket": return baseStyle + "text-purple-700 hover:bg-purple-100"; case "shopwice": return baseStyle + "text-green-700 hover:bg-green-100"; default: return baseStyle + "text-gray-700 hover:bg-gray-100"; } } };
 
   if (isLoadingApp) return <AppLoader />;
 
@@ -474,43 +357,6 @@ const handlePriceChange = (range: { min: number; max: number }) => {
               <button type="submit" className={`absolute right-0 top-1/2 transform -translate-y-1/2 bg-yellow-400 hover:bg-yellow-500 text-emerald-900 rounded-full flex items-center justify-center shadow-md hover:shadow-lg transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-offset-2 ${isScrolled ? 'h-8 w-8 sm:h-9 sm:w-9 hover:scale-105' : 'h-10 w-10 sm:h-12 sm:w-12 hover:scale-110'}`} aria-label="Search">
                 <MagnifyingGlassIcon className={`transition-all duration-300 ease-in-out stroke-[2.5] ${isScrolled ? 'h-4 w-4 sm:h-5 sm:w-5' : 'h-5 w-5 sm:h-6 sm:w-6'}`} />
               </button>
-<<<<<<< HEAD
-            ))}
-            <div className="relative" onMouseEnter={handleDropdownContainerMouseEnter} onMouseLeave={handleDropdownContainerMouseLeave}>
-              <button
-                type="button"
-                ref={moreButtonRef}
-                onClick={openFullScreenModal}
-                className={`font-medium rounded-full transition-all duration-300 ease-in-out flex items-center gap-1 bg-amber-100 text-amber-700 hover:bg-amber-200 ${isScrolled ? 'px-3 py-1 text-xs' : 'px-4 py-1.5 text-xs sm:text-sm'}`}
-                aria-label="More categories"
-                aria-haspopup="true"
-                aria-expanded={isCategoryDropdownVisible || isCategoryModalOpen}
-              >
-                <span>More</span>
-                <ChevronDownIcon className={`transition-transform duration-200 ease-in-out stroke-[2.5] text-amber-600 ${isCategoryDropdownVisible ? 'rotate-180' : 'rotate-0'} ${isScrolled ? 'h-3 w-3' : 'h-3 w-3 sm:h-4 sm:w-4'}`} />
-              </button>
-              {isCategoryDropdownVisible && (
-                <CategoryDropdown categories={categories} onSelectCategory={(slug) => { handleCategorySelect(slug); }} onViewAllClick={() => { setIsCategoryDropdownVisible(false); openFullScreenModal(); }} />
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-      <div className="flex">
-        <FilterSidebar
-          filters={filters}
-          availableBrands={availableBrands}
-          availableTypes={availableTypes}
-          priceRange={priceRange}
-          onBrandChange={handleBrandChange}
-          onTypeChange={handleTypeChange}
-          onPriceChange={handlePriceChange}
-          onClearFilters={clearFilters}
-          hasActiveFilters={hasActiveFilters}
-          productCount={displayProducts.length}
-  />
-      <div className="flex-grow"> 
-=======
             </form>
             <div className={`flex flex-wrap items-center justify-center transition-all duration-300 ease-in-out ${isScrolled ? 'gap-1.5 sm:gap-2 mt-2.5' : 'gap-2 mt-6'}`}>
               {popularCategories.map((cat) => (
@@ -531,7 +377,6 @@ const handlePriceChange = (range: { min: number; max: number }) => {
           </div>
         </header>
         
->>>>>>> 24794146e955696fcb1761deafda73604445ca84
         <div className={`flex-grow w-full`}>
             {isCategoryModalOpen && (
               <div className="fixed inset-0 z-[80] flex items-center justify-center px-4 py-6" aria-modal="true" role="dialog" aria-labelledby="categories-modal-title">
@@ -579,29 +424,6 @@ const handlePriceChange = (range: { min: number; max: number }) => {
                         return (<div className="bg-yellow-50 text-yellow-700 text-sm p-3 rounded shadow-sm" key={`invalid-product-${Math.random()}`}>Data issue</div>);
                       }
 
-<<<<<<< HEAD
-                      let determinedImageUrl: string | undefined = p.imageUrl as string | undefined;
-                      const listings: VendorListing[] = Array.isArray(p.listings) ? p.listings as VendorListing[] : [];
-                      if (!determinedImageUrl && listings.length > 0 && listings[0].image_url) {
-                        determinedImageUrl = listings[0].image_url;
-                      }
-
-                      // Ensure all required Product fields are present
-                      const productForCard: Product = {
-                        id: p.id,
-                        name: p.name,
-                        price: p.price,
-                        title: (p as Product).title ?? p.name,
-                        listings: (p as Product).listings ?? [],
-                        imageUrl: determinedImageUrl,
-                        seller: (p as Product).seller,
-                      };
-
-                      return <ProductCard 
-                                key={productForCard.id} 
-                                product={productForCard} 
-                              />;
-=======
                       let determinedImageUrl: string | undefined = p.imageUrl;
                       if (!determinedImageUrl && p.listings && p.listings.length > 0 && p.listings[0].image_url) {
                         determinedImageUrl = p.listings[0].image_url;
@@ -609,7 +431,6 @@ const handlePriceChange = (range: { min: number; max: number }) => {
 
                       const productForCard: Product = { ...p, imageUrl: determinedImageUrl };
                       return <ProductCard key={productForCard.id} product={productForCard} />;
->>>>>>> 24794146e955696fcb1761deafda73604445ca84
                     })}
                   </div>
                   {totalProducts > 0 && totalPages > 1 && (
@@ -632,17 +453,9 @@ const handlePriceChange = (range: { min: number; max: number }) => {
           </section>
         </div>
 
-<<<<<<< HEAD
-      {/* Scroll to Top Button */}
-      <button onClick={scrollToTop} className={`fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-full shadow-lg z-40 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${showScrollToTopButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`} aria-label="Scroll to top">
-        <ArrowUpIcon className="h-6 w-6" />
-      </button>
-      </div>
-=======
         <button onClick={scrollToTop} className={`fixed bottom-6 right-6 sm:bottom-8 sm:right-8 bg-emerald-600 hover:bg-emerald-700 text-white p-3 rounded-full shadow-lg z-40 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:ring-offset-2 ${showScrollToTopButton ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`} aria-label="Scroll to top">
           <ArrowUpIcon className="h-6 w-6" />
         </button>
->>>>>>> 24794146e955696fcb1761deafda73604445ca84
 
         <footer className="bg-gray-900 text-gray-400">
            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
@@ -654,18 +467,8 @@ const handlePriceChange = (range: { min: number; max: number }) => {
             </div>
             <div className="mt-16 border-t border-gray-700 pt-8 text-center"><p className="text-sm">&copy; {currentYear} Komprice Technologies. All Rights Reserved.</p></div>
           </div>
-<<<<<<< HEAD
-          <div className="mt-16 border-t border-gray-700 pt-8 text-center"><p className="text-sm">&copy; {currentYear} Komprice Technologies. All Rights Reserved.</p></div>
-        </div>
-      </footer>
-      
-    </main>
-    );
-  }
-=======
         </footer>
       </div>
     </main>
   );
 }
->>>>>>> 24794146e955696fcb1761deafda73604445ca84

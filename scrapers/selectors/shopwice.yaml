@@ -1,11 +1,11 @@
 #selector/shopwice.yaml
 mobile-phones:
   url: "https://shopwice.com/product-category/mobile-phones/"
-  item: "div.product-small.box"
+  item: "div.product-small.col"
   link: "a"
   img:  "img"
-  title: "p.name.product-title a"
-  price: "span.price bdi"
+  title: "h3"
+  price: "span bdi"
   pagination:
     type: path      # one of: query, path, next
     param: page      # for query
@@ -16,11 +16,11 @@ mobile-phones:
 
 home-appliances:
   url: "https://shopwice.com/product-category/home-appliances/"
-  item: "div.product-small.box"
+  item: "div.product-small.col"
   link: "a"
   img:  "img"
-  title: "p.name.product-title a"
-  price: "span.price bdi"
+  title: "h3"
+  price: "span bdi"
   pagination:
     type: path      # one of: query, path, next
     param: page      # for query
@@ -30,11 +30,11 @@ home-appliances:
 
 gaming:
   url: "https://shopwice.com/product-category/video-games-consoles-and-accessories/"
-  item: "div.product-small.box"
+  item: "div.product-small.col"
   link: "a"
   img:  "img"
-  title: "p.name.product-title a"
-  price: "span.price bdi"
+  title: "h3"
+  price: "span bdi"
   pagination:
     type: path      # one of: query, path, next
     param: page      # for query
@@ -44,11 +44,11 @@ gaming:
 
 audio:
   url: "https://shopwice.com/product-category/audio/"
-  item: "div.product-small.box"
+  item: "div.product-small.col"
   link: "a"
   img:  "img"
-  title: "p.name.product-title a"
-  price: "span.price bdi"
+  title: "h3"
+  price: "span bdi"
   pagination:
     type: path      # one of: query, path, next
     param: page      # for query
@@ -58,11 +58,11 @@ audio:
 
 entertainment:
   url: "https://shopwice.com/product-category/tvs-home-entertainment/"
-  item: "div.product-small.box"
+  item: "div.product-small.col"
   link: "a"
   img:  "img"
-  title: "p.name.product-title a"
-  price: "span.price bdi"
+  title: "h3"
+  price: "span bdi"
   pagination:
     type: path      # one of: query, path, next
     param: page      # for query
@@ -72,11 +72,11 @@ entertainment:
 
 cameras:
   url: "https://shopwice.com/product-category/cameras/"
-  item: "div.product-small.box"
+  item: "div.product-small.col"
   link: "a"
   img:  "img"
-  title: "p.name.product-title a"
-  price: "span.price bdi"
+  title: "h3"
+  price: "span bdi"
   pagination:
     type: path      # one of: query, path, next
     param: page      # for query
@@ -86,11 +86,11 @@ cameras:
 
 computer:
   url: "https://shopwice.com/product-category/computers/"
-  item: "div.product-small.box"
+  item: "div.product-small.col"
   link: "a"
   img:  "img"
-  title: "p.name.product-title a"
-  price: "span.price bdi"
+  title: "h3"
+  price: "span bdi"
   pagination:
     type: path      # one of: query, path, next
     param: page      # for query
@@ -100,11 +100,11 @@ computer:
 
 health-beauty:
   url: "https://shopwice.com/product-category/health-and-beauty/"
-  item: "div.product-small.box"
+  item: "div.product-small.col"
   link: "a"
   img:  "img"
-  title: "p.name.product-title a"
-  price: "span.price bdi"
+  title: "h3"
+  price: "span bdi"
   pagination:
     type: path      # one of: query, path, next
     param: page      # for query
@@ -114,11 +114,11 @@ health-beauty:
 
 fashion:
   url: "https://shopwice.com/product-category/fashion/"
-  item: "div.product-small.box"
+  item: "div.product-small.col"
   link: "a"
   img:  "img"
-  title: "p.name.product-title a"
-  price: "span.price bdi"
+  title: "h3"
+  price: "span bdi"
   pagination:
     type: path      # one of: query, path, next
     param: page      # for query
