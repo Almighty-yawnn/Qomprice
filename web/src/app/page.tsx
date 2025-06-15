@@ -259,26 +259,64 @@ export default function Home() {
     if (newParams.toString() !== params.toString()) { router.replace(`/?${newParams.toString()}`, { scroll: false }); }
   }, [debouncedSearchTerm, selectedCategorySlug, selectedSiteId, debouncedMinPrice, debouncedMaxPrice, currentLimit, currentPage, router, params]);
 
-  useEffect(() => {
+    useEffect(() => {
     if (isLoadingApp || initialLimit === undefined) return;
     (async () => {
       setLoading(true);
       setError(null);
+
       try {
-        const min = parseFloat(debouncedMinPrice);
-        const max = parseFloat(debouncedMaxPrice);
-        const { products, total } = await searchProducts({ q: debouncedSearchTerm, category: expandedCategorySlugs, limit: currentLimit, page: currentPage, site_id: selectedSiteId, minPrice: !isNaN(min) && min >= 0 ? min : undefined, maxPrice: !isNaN(max) && max > 0 ? max : undefined });
+        // ── OVERRIDE “phones” AS “all phone/tablet slugs” ──
+        let actualQuery    = debouncedSearchTerm.trim();
+        let actualCategory = expandedCategorySlugs;
+
+        const term = actualQuery.toLowerCase();
+        if (["phone","phones","mobile","mobiles"].includes(term)) {
+          // replace with the exact slugs in your DB:
+          actualCategory = [
+            "mobile-phones",
+            "phones-&-accessories",
+            "phones-tablets",
+          ];
+          actualQuery = "";
+        }
+
+        // fetch with our overrides
+        const { products, total } = await searchProducts({
+          q:        actualQuery,
+          category: actualCategory,
+          limit:    currentLimit,
+          page:     currentPage,
+          site_id:  selectedSiteId,
+          minPrice: !isNaN(+debouncedMinPrice) ? +debouncedMinPrice : undefined,
+          maxPrice: !isNaN(+debouncedMaxPrice) ? +debouncedMaxPrice : undefined,
+        });
+
         setProducts(products);
         setTotalProducts(total);
-      } catch (e: unknown) { 
-        const errorMessage = e instanceof Error ? e.message : String(e);
-        setError("Failed to load products: " + errorMessage); 
-        setProducts([]); 
-        setTotalProducts(0); 
+
+      } catch (err: unknown) {
+        const msg = err instanceof Error ? err.message : String(err);
+        setError("Failed to load products: " + msg);
+        setProducts([]);
+        setTotalProducts(0);
+
+      } finally {
+        setLoading(false);
       }
-      finally { setLoading(false); }
     })();
-  }, [debouncedSearchTerm, expandedCategorySlugs, selectedSiteId, debouncedMinPrice, debouncedMaxPrice, currentPage, currentLimit, isLoadingApp, initialLimit]);
+  }, [
+    debouncedSearchTerm,
+    expandedCategorySlugs,
+    selectedSiteId,
+    debouncedMinPrice,
+    debouncedMaxPrice,
+    currentPage,
+    currentLimit,
+    isLoadingApp,
+    initialLimit,
+  ]);
+
 
   useEffect(() => { setSearchInput(initialQ); setSelectedCategorySlug(initialCat); setExpandedCategorySlugs(initialCat || ""); setSelectedSiteId(initialSiteId); setMinPrice(initialMinPrice); setMaxPrice(initialMaxPrice); }, [initialQ, initialCat, initialSiteId, initialMinPrice, initialMaxPrice]);
 
