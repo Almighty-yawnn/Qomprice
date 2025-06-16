@@ -58,7 +58,7 @@ export default function SitemapPage() {
                     </Link>
                   </li>
                 ))}
-                 <li>
+                <li>
                     <Link href="/help-center#faqs" className="text-emerald-600 hover:text-emerald-800 hover:underline">
                       Frequently Asked Questions
                     </Link>
@@ -66,14 +66,14 @@ export default function SitemapPage() {
               </ul>
             </div>
           </div>
-           <p className="mt-10 text-sm text-gray-600">
-            If you can't find what you're looking for, please feel free to <Link href="/help-center" className="text-emerald-600 hover:underline">contact our support team</Link>.
+          <p className="mt-10 text-sm text-gray-600">
+            If you can&#39;t find what you&#39;re looking for, please feel free to <Link href="/help-center" className="text-emerald-600 hover:underline">contact our support team</Link>.
           </p>
         </div>
       </div>
-       <footer className="bg-gray-800 text-gray-300 pt-10 pb-8 mt-12">
+      <footer className="bg-gray-800 text-gray-300 pt-10 pb-8 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 text-center text-xs">
-             <div className="flex flex-wrap justify-center md:justify-center gap-x-4 gap-y-2 mb-4 md:mb-0">
+            <div className="flex flex-wrap justify-center md:justify-center gap-x-4 gap-y-2 mb-4 md:mb-0">
                 <Link href="/terms-of-use" className="hover:text-white transition-colors">Terms of Use</Link>
                 <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
                 <Link href="/cookie-policy" className="hover:text-white transition-colors">Cookie Policy</Link>
