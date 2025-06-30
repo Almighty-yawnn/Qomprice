@@ -8,7 +8,7 @@ phones-tablets:
   price: "a div.flex.px-2 p.font-medium.text-primary-500" # product price
   pagination:
     type: infinite
-    scroll_delay: 10.0     # seconds to wait after each scroll
+    scroll_delay: 30.0     # seconds to wait after each scroll
 
 
 

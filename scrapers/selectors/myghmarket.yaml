@@ -1,5 +1,5 @@
 #selector/ghmarket.yaml
-phones-and-accessories:
+phones-&-accessories:
   url: "https://myghmarket.com/product-category/phones-and-accessories/?v=19b19ffc30ca"
   item: "div.product-small.col"                              # product card container
   link: "div.box-image div.image-fade_in_back a"             # product detail page link

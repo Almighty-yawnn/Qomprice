@@ -25,7 +25,7 @@ home-kitchen:
     param: page      # for query
     template: "?page={n}"  # for path
     next_selector: "a.next"  # for next-button
-    max_pages: 10   # optional
+    max_pages: 1   # optional
 
 electronics:
   url: "https://www.ishtari.com.gh/Electronics/c=2"
@@ -39,7 +39,7 @@ electronics:
     param: page      # for query
     template: "?page={n}"  # for path
     next_selector: "a.next"  # for next-button
-    max_pages: 10   # optional
+    max_pages: 3   # optional
 
 kitchen-dinning:
   url: "https://www.ishtari.com.gh/Tools-Improvement/c=134"

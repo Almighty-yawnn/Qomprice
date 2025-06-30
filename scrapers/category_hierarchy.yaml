@@ -1,9 +1,10 @@
 # scrapers/category_hierarchy.yaml
 Electronics:
   Mobile Phones & Tablets:
-    - Mobile Phones
-    - Phones & Accessories
+    - Mobile-Phones
+    - Phones-&-Accessories
     - Phones-Tablets
+    - electronics
   Computers & Accessories:
     - Computers
     - Computing

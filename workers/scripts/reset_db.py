@@ -1,6 +1,4 @@
 # worker/scripts/reset_db.py
-
-# scripts/clear_products.py
 import asyncio
 from sqlalchemy import text
 from app.db import AsyncSessionLocal

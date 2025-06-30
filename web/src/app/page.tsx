@@ -1,6 +1,6 @@
 // src/app/page.tsx
 "use client";
-
+import FilterSidebar from "@/components/ui/FilterSidebar";
 import { useSearchParams, useRouter } from "next/navigation";
 import {
   useEffect,
@@ -128,6 +128,10 @@ export default function Home() {
   const [totalProducts, setTotalProducts] = useState(0);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selectedBrands, setSelectedBrands] = useState<string[]>([]);
+  const [selectedTypes, setSelectedTypes] = useState<string[]>([]);
+  const [applyFilterTrigger, setApplyFilterTrigger] = useState(0);
+
 
   // --- Sidebar & Filter States ---
   const [isSiteFilterSidebarOpen, setIsSiteFilterSidebarOpen] = useState(false);
@@ -249,8 +253,20 @@ export default function Home() {
   useEffect(() => {
     const newParams = new URLSearchParams();
     if (debouncedSearchTerm) newParams.set("q", debouncedSearchTerm);
-    if (selectedCategorySlug) newParams.set("category", selectedCategorySlug);
-    if (selectedSiteId) newParams.set("site_id", selectedSiteId);
+    // if (selectedCategorySlug) newParams.set("category", selectedCategorySlug);
+    // if (selectedSiteId) newParams.set("site_id", selectedSiteId);
+    if (selectedTypes.length > 0) {
+    newParams.set("category", selectedTypes.join(","));
+    } else if (selectedCategorySlug) {
+      newParams.set("category", selectedCategorySlug);
+    }
+
+    if (selectedBrands.length > 0) {
+      newParams.set("site_id", selectedBrands.join(","));
+    } else if (selectedSiteId) {
+      newParams.set("site_id", selectedSiteId);
+    }
+
     if (debouncedMinPrice) newParams.set("min_price", debouncedMinPrice);
     if (debouncedMaxPrice) newParams.set("max_price", debouncedMaxPrice);
     newParams.set("limit", currentLimit.toString());
@@ -260,65 +276,74 @@ export default function Home() {
   }, [debouncedSearchTerm, selectedCategorySlug, selectedSiteId, debouncedMinPrice, debouncedMaxPrice, currentLimit, currentPage, router, params]);
 
     useEffect(() => {
-    if (isLoadingApp || initialLimit === undefined) return;
-    (async () => {
-      setLoading(true);
-      setError(null);
+        if (isLoadingApp || initialLimit === undefined) return;
+        (async () => {
+          setLoading(true);
+          setError(null);
 
-      try {
-        // ── OVERRIDE “phones” AS “all phone/tablet slugs” ──
-        let actualQuery    = debouncedSearchTerm.trim();
-        let actualCategory = expandedCategorySlugs;
+          try {
+            let actualQuery    = debouncedSearchTerm.trim();
+            let actualCategory = selectedTypes.length > 0 ? selectedTypes : expandedCategorySlugs;
 
-        const term = actualQuery.toLowerCase();
-        if (["phone","phones","mobile","mobiles"].includes(term)) {
-          // replace with the exact slugs in your DB:
-          actualCategory = [
-            "mobile-phones",
-            "phones-&-accessories",
-            "phones-tablets",
-          ];
-          actualQuery = "";
-        }
 
-        // fetch with our overrides
-        const { products, total } = await searchProducts({
-          q:        actualQuery,
-          category: actualCategory,
-          limit:    currentLimit,
-          page:     currentPage,
-          site_id:  selectedSiteId,
-          minPrice: !isNaN(+debouncedMinPrice) ? +debouncedMinPrice : undefined,
-          maxPrice: !isNaN(+debouncedMaxPrice) ? +debouncedMaxPrice : undefined,
-        });
+            const term = actualQuery.toLowerCase();
+            if (["phone","phones","mobile","mobiles"].includes(term)) {
+              actualCategory = [
+                "mobile-phones",
+                "phones-accessories",  // <- corrected slug
+                "phones-tablets",
+              ];
+              actualQuery = "";
+            }
 
-        setProducts(products);
-        setTotalProducts(total);
+            // only parse price if non‐empty
+            const min = debouncedMinPrice !== "" && !isNaN(+debouncedMinPrice)
+              ? +debouncedMinPrice
+              : undefined;
+            const max = debouncedMaxPrice !== "" && !isNaN(+debouncedMaxPrice)
+              ? +debouncedMaxPrice
+              : undefined;
 
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err);
-        setError("Failed to load products: " + msg);
-        setProducts([]);
-        setTotalProducts(0);
+            const { products, total } = await searchProducts({
+              q:        actualQuery,
+              category: actualCategory,
+              limit:    currentLimit,
+              page:     currentPage,
+              site_id: selectedBrands.length > 0 ? selectedBrands.join(',') : selectedSiteId,
+              minPrice: min,
+              maxPrice: max,
+            });
 
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [
-    debouncedSearchTerm,
-    expandedCategorySlugs,
-    selectedSiteId,
-    debouncedMinPrice,
-    debouncedMaxPrice,
-    currentPage,
-    currentLimit,
-    isLoadingApp,
-    initialLimit,
-  ]);
+            setProducts(products);
+            setTotalProducts(total);
 
+          } catch (err: unknown) {
+            const msg = err instanceof Error ? err.message : String(err);
+            setError("Failed to load products: " + msg);
+            setProducts([]);
+            setTotalProducts(0);
+          } finally {
+            setLoading(false);
+          }
+        })();
+      }, [
+        debouncedSearchTerm,
+        expandedCategorySlugs,
+        selectedSiteId,
+        debouncedMinPrice,
+        debouncedMaxPrice,
+        currentPage,
+        currentLimit,
+        isLoadingApp,
+        initialLimit,
+        applyFilterTrigger,
+      ]);
 
   useEffect(() => { setSearchInput(initialQ); setSelectedCategorySlug(initialCat); setExpandedCategorySlugs(initialCat || ""); setSelectedSiteId(initialSiteId); setMinPrice(initialMinPrice); setMaxPrice(initialMaxPrice); }, [initialQ, initialCat, initialSiteId, initialMinPrice, initialMaxPrice]);
+
+
+
+
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -337,50 +362,119 @@ export default function Home() {
 
   const sidebarMarginPx = isSiteFilterSidebarOpen ? (SIDEBAR_WIDTH_CLASSES.includes('sm:w-72') ? 288 : 256) : 0;
 
+
+    // 1. Figure out when *any* filter is active:
+  const hasActiveFilters = Boolean(
+    debouncedSearchTerm ||
+    selectedCategorySlug ||
+    selectedSiteId ||
+    (debouncedMinPrice !== "" && !isNaN(+debouncedMinPrice)) ||
+    (debouncedMaxPrice !== "" && !isNaN(+debouncedMaxPrice))
+  );
+
+  // 2. Reset-all handler:
+  const handleClearFilters = () => {
+    setSearchInput("");
+    setDebouncedSearchTerm("");
+    setSelectedCategorySlug("");
+    setExpandedCategorySlugs("");
+    setSelectedSiteId("");
+    setMinPrice("");
+    setMaxPrice("");
+    setDebouncedMinPrice("");
+    setDebouncedMaxPrice("");
+    setSelectedBrands([]);
+    setSelectedTypes([]);
+
+    // Delay router.replace slightly to allow state to settle
+    setTimeout(() => {
+      router.replace("/", { scroll: false });
+    }, 50); // small enough delay to wait for React state updates
+  };
+
+
+  //
+  // === 1. define your *allowed* price‐range from the server/API
+  //
+  // Replace these 0 & 10000 with whatever your backend says:
+// define your “allowed” min/max from API
+  const apiMin = 0
+  const apiMax = 10000
+  const pagePriceRange = { min: apiMin, max: apiMax }
+
+  
+
+  const handleBrandChange = (brand: string) => {
+    setSelectedBrands(prev => prev.includes(brand)
+      ? prev.filter(b => b !== brand)
+      : [...prev, brand]);
+  };
+
+  const handleTypeChange = (type: string) => {
+    setSelectedTypes(prev => prev.includes(type)
+      ? prev.filter(t => t !== type)
+      : [...prev, type]);
+  };
+
+
+
+
+
+
+
+
+
   return (
     <main className="min-h-screen bg-gray-100 text-gray-800 flex flex-col">
       <button onClick={toggleSiteFilterSidebar} className={`fixed top-1/3 transform -translate-y-1/2 z-[75] p-2 bg-emerald-600 text-white rounded-r-lg shadow-lg hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 transition-all duration-300 ease-in-out`} style={{ left: isSiteFilterSidebarOpen ? `${sidebarMarginPx}px` : '0px' }} aria-label={isSiteFilterSidebarOpen ? "Close site filters" : "Open site filters"} aria-expanded={isSiteFilterSidebarOpen} aria-controls="site-filter-sidebar">
         {isSiteFilterSidebarOpen ? <ChevronLeftIcon className="h-5 w-5 sm:h-6 sm:w-6" /> : <ChevronRightIcon className="h-5 w-5 sm:h-6 sm:w-6" />}
       </button>
-
-      {isSiteFilterSidebarOpen && <div className="fixed inset-0 bg-black/40 z-[65] md:hidden" onClick={toggleSiteFilterSidebar} aria-hidden="true" />}
       
-      <aside id="site-filter-sidebar" className={`fixed top-0 left-0 h-full bg-white border-r border-gray-200 shadow-xl z-[70] transition-transform duration-300 ease-in-out flex flex-col ${SIDEBAR_WIDTH_CLASSES} ${isSiteFilterSidebarOpen ? "translate-x-0" : "-translate-x-full"}`} aria-labelledby="site-filter-sidebar-title">
-        <div className="flex items-center justify-between p-4 border-b border-gray-200">
-          <h2 id="site-filter-sidebar-title" className="text-lg font-semibold text-gray-800">Filters</h2>
-          <button onClick={toggleSiteFilterSidebar} className="p-1 text-gray-500 hover:text-gray-800 rounded-md hover:bg-gray-100"><XMarkIcon className="h-6 w-6" /></button>
-        </div>
-        
-        <nav className="flex-grow p-3 space-y-4 overflow-y-auto">
-          <div className="relative" ref={siteFilterDropdownRef}>
-            <h3 className="text-sm font-medium text-gray-500 mb-1.5 px-1">Filter by Site</h3>
-            <button type="button" onClick={toggleSiteFilterDropdown} className="w-full flex items-center justify-between text-left px-3 py-2.5 bg-gray-50 hover:bg-gray-100 border border-gray-300 rounded-md text-sm text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500" aria-haspopup="listbox" aria-expanded={isSiteFilterDropdownOpen}>
-              <span className="truncate">{selectedMarketplaceName}</span>
-              <ChevronDownIcon className={`w-5 h-5 text-gray-400 transition-transform duration-200 ${isSiteFilterDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {isSiteFilterDropdownOpen && (
-              <div className="absolute z-10 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg max-h-60 overflow-y-auto focus:outline-none">
-                {isLoadingMarketplaces ? (<div className="p-4 flex justify-center"><ArrowPathIcon className="h-5 w-5 animate-spin" /></div>) : (marketplaces.map((site) => (<button key={site.site_id || 'all-sites-dropdown'} onClick={() => handleSiteIdSelect(site.site_id)} className={getSiteDropdownItemStyles(site.site_id, selectedSiteId)} role="option" aria-selected={selectedSiteId === site.site_id}>{site.name}</button>)))}
-              </div>
-            )}
-          </div>
 
-          <div className="relative">
-            <h3 className="text-sm font-medium text-gray-500 mb-1.5 px-1">Filter by Price (GHS)</h3>
-            <div className="flex items-center space-x-2">
-                <div className="relative flex-1">
-                  <label htmlFor="min-price" className="sr-only">Minimum Price</label>
-                  <input type="number" id="min-price" name="min-price" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="Min" className="w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm py-2 px-3" aria-label="Minimum price" />
-                </div>
-                <div className="text-gray-400">-</div>
-                <div className="relative flex-1">
-                  <label htmlFor="max-price" className="sr-only">Maximum Price</label>
-                  <input type="number" id="max-price" name="max-price" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Max" className="w-full rounded-md border-gray-300 shadow-sm focus:border-emerald-500 focus:ring-emerald-500 sm:text-sm py-2 px-3" aria-label="Maximum price" />
-                </div>
-            </div>
-          </div>
-        </nav>
+
+      
+      {isSiteFilterSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-[65] md:hidden"
+          onClick={toggleSiteFilterSidebar}
+          aria-hidden="true"
+        />
+      )}
+
+      <aside
+        id="site-filter-sidebar"
+        className={`fixed top-1/2 transform -translate-y-1/2 z-[75] p-2 bg-emerald-600 rounded-r-lg shadow-lg hover:bg-emerald-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-400 transition-all duration-300 ease-in-out ${
+          isSiteFilterSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
+        <FilterSidebar
+          filters={{
+            brands: selectedBrands,
+            productTypes: selectedTypes,
+            priceRange: {
+              min: debouncedMinPrice === '' ? pagePriceRange.min : Number(debouncedMinPrice),
+              max: debouncedMaxPrice === '' ? pagePriceRange.max : Number(debouncedMaxPrice),
+            },
+          }}
+          availableBrands={marketplaces.map((m) => m.name)}
+          availableTypes={categories.map((c) => c.slug)}
+          priceRange={pagePriceRange}
+          onBrandChange={handleBrandChange}
+          onTypeChange={handleTypeChange}
+          onPriceChange={({ min, max }) => {
+            // setMinPrice(String(min));
+            // setMaxPrice(String(max));
+            // setDebouncedMinPrice(String(min));
+            // setDebouncedMaxPrice(String(max));
+            setApplyFilterTrigger(prev => prev + 1); // 👈 force re-trigger
+          }}
+          onClearFilters={handleClearFilters}
+          hasActiveFilters={hasActiveFilters}
+          productCount={totalProducts}
+        />
       </aside>
+
+
 
       <div className={`flex flex-col flex-grow transition-all duration-300 ease-in-out ${isSiteFilterSidebarOpen ? `md:ml-${SIDEBAR_WIDTH_CLASSES.split(' ')[1].substring(3)}` : ''}`}>
         <header
