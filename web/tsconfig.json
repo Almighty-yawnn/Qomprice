@@ -6,9 +6,8 @@
       "dom.iterable",
       "esnext"
     ],
-   "moduleResolution": "node",
-  
-   "allowSyntheticDefaultImports": true,
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -18,7 +17,7 @@
     //"moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "incremental": true,
     "plugins": [
       {
@@ -37,7 +36,7 @@
     "next-env.d.ts",
     "tailwind.config.js",
     ".next/types/**/*.ts",
-    "src/types",  
+    "src/types"
   ],
   "exclude": [
     "node_modules"
