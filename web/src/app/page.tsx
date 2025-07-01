@@ -404,18 +404,23 @@ export default function Home() {
 
   
 
-  const handleBrandChange = (brand: string) => {
-    setSelectedBrands(prev => prev.includes(brand)
-      ? prev.filter(b => b !== brand)
-      : [...prev, brand]);
+  const handleBrandChange = (brands: string[]) => {
+    setSelectedBrands(brands);
+    setApplyFilterTrigger((prev) => prev + 1);
   };
 
-  const handleTypeChange = (type: string) => {
-    setSelectedTypes(prev => prev.includes(type)
-      ? prev.filter(t => t !== type)
-      : [...prev, type]);
+  const handleTypeChange = (types: string[]) => {
+    setSelectedTypes(types);
+    setApplyFilterTrigger((prev) => prev + 1);
   };
 
+  const handlePriceChange = ({ min, max }: { min: number; max: number }) => {
+    setMinPrice(String(min));
+    setMaxPrice(String(max));
+    setDebouncedMinPrice(String(min));
+    setDebouncedMaxPrice(String(max));
+    setApplyFilterTrigger((prev) => prev + 1);
+  };
 
 
 
@@ -461,13 +466,7 @@ export default function Home() {
           priceRange={pagePriceRange}
           onBrandChange={handleBrandChange}
           onTypeChange={handleTypeChange}
-          onPriceChange={({ min, max }) => {
-            // setMinPrice(String(min));
-            // setMaxPrice(String(max));
-            // setDebouncedMinPrice(String(min));
-            // setDebouncedMaxPrice(String(max));
-            setApplyFilterTrigger(prev => prev + 1); // 👈 force re-trigger
-          }}
+          onPriceChange={handlePriceChange}
           onClearFilters={handleClearFilters}
           hasActiveFilters={hasActiveFilters}
           productCount={totalProducts}
