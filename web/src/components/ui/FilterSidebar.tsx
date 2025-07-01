@@ -38,11 +38,28 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 }) => {
   const [collapsed, setCollapsed] = useState(false)
 
-  // two-thumb slider values
+  // // two-thumb slider values
+  // const [values, setValues] = useState<[number, number]>([
+  //   filters.priceRange.min,
+  //   filters.priceRange.max,
+  // ])
+
+    // Inside FilterSidebar
+
+  const [selectedBrands, setSelectedBrands] = useState(filters.brands);
+  const [selectedTypes, setSelectedTypes] = useState(filters.productTypes);
   const [values, setValues] = useState<[number, number]>([
     filters.priceRange.min,
     filters.priceRange.max,
-  ])
+  ]);
+
+  const handleApplyFilters = () => {
+    onBrandChange(selectedBrands);
+    onTypeChange(selectedTypes);
+    onPriceChange({ min: values[0], max: values[1] });
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
 
   return (
     <aside className="relative flex">
@@ -101,9 +118,12 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     >
                       <input
                         type="checkbox"
-                        className="hidden"
-                        checked={filters.brands.includes(b)}
-                        onChange={() => onBrandChange(b)}
+                        checked={selectedBrands.includes(b)}
+                        onChange={() =>
+                          setSelectedBrands((prev) =>
+                            prev.includes(b) ? prev.filter((x) => x !== b) : [...prev, b]
+                          )
+                        }
                       />
                       <span>{b}</span>
                     </label>
@@ -135,9 +155,12 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                     >
                       <input
                         type="checkbox"
-                        checked={filters.productTypes.includes(t)}
-                        onChange={() => onTypeChange(t)}
-                        className="hidden"
+                        checked={selectedTypes.includes(t)}
+                        onChange={() =>
+                          setSelectedTypes((prev) =>
+                            prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
+                          )
+                        }
                       />
                       <span>{t}</span>
                     </label>
@@ -190,14 +213,10 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
           
 
           <button
-            onClick={() => {
-              onPriceChange({ min: values[0], max: values[1] });
-              window.scrollTo({ top: 0, behavior: "smooth" });
-              // optionally trigger refresh here or let page.tsx react to state changes
-            }}
+            onClick={handleApplyFilters}
             className="w-full mt-2 bg-emerald-500 text-white py-2 rounded-md hover:bg-emerald-600 transition"
-          >
-            Apply Filters
+            >
+              Apply Filters
           </button>
 
 
