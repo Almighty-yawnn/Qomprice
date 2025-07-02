@@ -5,7 +5,7 @@ export const useProductFilters = (products: Product[]) => {
   const [filters, setFilters] = useState<FilterState>({
     brands: [],
     productTypes: [],
-    priceRange: { min: 0, max: 10000 }
+    priceRange: { min: 0, max: 100000 }
   });
 
   const availableBrands = useMemo(() => {
@@ -36,7 +36,7 @@ export const useProductFilters = (products: Product[]) => {
   }, [products]);
 
   const priceRange = useMemo(() => {
-    if (products.length === 0) return { min: 0, max: 10000 };
+    if (products.length === 0) return { min: 0, max: 100000 };
     const prices = products.map(p => p.price || 0);
     return {
       min: Math.floor(Math.min(...prices)),

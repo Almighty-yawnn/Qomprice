@@ -396,10 +396,10 @@ export default function Home() {
   //
   // === 1. define your *allowed* price‐range from the server/API
   //
-  // Replace these 0 & 10000 with whatever your backend says:
+  // Replace these 0 & 100000 with whatever your backend says:
 // define your “allowed” min/max from API
   const apiMin = 0
-  const apiMax = 10000
+  const apiMax = 100000
   const pagePriceRange = { min: apiMin, max: apiMax }
 
   
