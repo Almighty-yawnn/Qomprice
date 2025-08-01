@@ -12,7 +12,7 @@ const mockPopularProducts = [
 export default function PopularProductsPage() {
   return (
     <main className="min-h-screen bg-gray-100 text-gray-800">
-       <header className="bg-emerald-700 text-white shadow-md">
+      <header className="bg-emerald-700 text-white shadow-md">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex justify-between items-center">
           <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
             <Link href="/" className="hover:text-emerald-200">Komprice</Link>
@@ -28,7 +28,7 @@ export default function PopularProductsPage() {
             Popular Products
           </h1>
           <p className="text-center text-gray-600 mb-8">
-            Discover what's trending! Here are some of our most popular items right now.
+            Discover what&#39;s trending! Here are some of our most popular items right now.
           </p>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {mockPopularProducts.map(product => (

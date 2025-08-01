@@ -4,7 +4,7 @@
 import { useState, useMemo, Suspense } from "react";
 import Head from "next/head"; // For Schema
 import { MagnifyingGlassIcon } from "@heroicons/react/24/outline";
-import { faqData, faqCategories, FAQ } from "@/lib/faqData"; // Adjust path as needed
+import { faqData, faqCategories } from "@/lib/faqData"; // Adjust path as needed
 import FaqItem from "@/components/help-center/FaqItem";     // Adjust path as needed
 import { useSearchParams, useRouter } from "next/navigation";
 

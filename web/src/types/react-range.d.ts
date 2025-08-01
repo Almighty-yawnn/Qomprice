@@ -10,11 +10,11 @@ declare module "react-range" {
     onChange: (values: number[]) => void;
     onFinalChange?: (values: number[]) => void;
     renderTrack: (opts: {
-      props: any;
+      props: React.HTMLProps<HTMLDivElement>;
       children: React.ReactNode;
     }) => React.ReactNode;
     renderThumb: (opts: {
-      props: any;
+      props: React.HTMLProps<HTMLDivElement>;
       children?: React.ReactNode;
     }) => React.ReactNode;
   }

@@ -42,7 +42,7 @@ electronics:
     max_pages: 3   # optional
 
 kitchen-dinning:
-  url: "https://www.ishtari.com.gh/Tools-Improvement/c=134"
+  url: "https://www.ishtari.com.gh/KITCHEN-DINING!/c=134"
   item: "div.slick-slide div div.p-1"
   link: "a.cursor-pointer"
   img:  "img.product-image-exp"

@@ -2,13 +2,11 @@
 import React, { useState } from 'react'
 import { Disclosure } from '@headlessui/react'
 import {
-  ChevronLeftIcon,
   ChevronRightIcon,
   ChevronDownIcon,
   XMarkIcon,
 } from '@heroicons/react/24/outline'
 import { Range } from 'react-range'
-import ProductFilters from './ProductFilters'
 import { FilterState } from '../../types/filters'
 
 interface FilterSidebarProps {
@@ -16,8 +14,8 @@ interface FilterSidebarProps {
   availableBrands: string[]
   availableTypes: string[]
   priceRange: { min: number; max: number }
-  onBrandChange: (brand: string) => void
-  onTypeChange: (type: string) => void
+  onBrandChange: (brands: string[]) => void  // Changed from string to string[]
+  onTypeChange: (types: string[]) => void    // Changed from string to string[]
   onPriceChange: (range: { min: number; max: number }) => void
   onClearFilters: () => void
   hasActiveFilters: boolean
@@ -38,14 +36,6 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 }) => {
   const [collapsed, setCollapsed] = useState(false)
 
-  // // two-thumb slider values
-  // const [values, setValues] = useState<[number, number]>([
-  //   filters.priceRange.min,
-  //   filters.priceRange.max,
-  // ])
-
-    // Inside FilterSidebar
-
   const [selectedBrands, setSelectedBrands] = useState(filters.brands);
   const [selectedTypes, setSelectedTypes] = useState(filters.productTypes);
   const [values, setValues] = useState<[number, number]>([
@@ -54,12 +44,11 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
   ]);
 
   const handleApplyFilters = () => {
-    onBrandChange(selectedBrands);
-    onTypeChange(selectedTypes);
+    onBrandChange(selectedBrands);  // Now passes array correctly
+    onTypeChange(selectedTypes);    // Now passes array correctly
     onPriceChange({ min: values[0], max: values[1] });
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
-
 
   return (
     <aside className="relative flex">
@@ -182,7 +171,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
               onFinalChange={(v) => onPriceChange({ min: v[0], max: v[1] })}
               renderTrack={({ props, children }) => {
                 // extract key before spreading
-                const { key, ...rest } = props as any;
+                const { key, ...rest } = props as React.HTMLProps<HTMLDivElement> & { key: string };
                 return (
                   <div
                     key={key}
@@ -194,7 +183,7 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
                 );
               }}
               renderThumb={({ props }) => {
-                const { key, ...rest } = props as any;
+                const { key, ...rest } = props as React.HTMLProps<HTMLDivElement> & { key: string };
                 return (
                   <div key={key} {...rest} className="h-5 w-5 bg-emerald-600 border-2 border-white rounded-full shadow-md transition-all duration-150" />
                 );
@@ -210,16 +199,12 @@ const FilterSidebar: React.FC<FilterSidebarProps> = ({
 
         {/* FOOTER */}
         <div className="p-4 border-t">
-          
-
           <button
             onClick={handleApplyFilters}
             className="w-full mt-2 bg-emerald-500 text-white py-2 rounded-md hover:bg-emerald-600 transition"
             >
               Apply Filters
           </button>
-
-
         </div>
       </div>
 
