@@ -1,5 +1,5 @@
 // src/components/ui/AppLoader.tsx
-import React from 'react';
+import React from "react";
 
 const AppLoader = () => {
   return (
@@ -11,13 +11,17 @@ const AppLoader = () => {
       </h1>
       <div className="w-3/4 sm:w-1/2 md:w-1/3 max-w-xs h-2.5 sm:h-3 bg-gray-700 rounded-full overflow-hidden shadow-inner">
         <div
-          className="h-full rounded-full bg-gradient-to-r from-lime-400 via-green-500 to-emerald-700 bg-[length:300%_300%] animate-gradient-flow animate-loader-fill"
-          style={{
-            // animationDelay: '0.1s', // Optional small delay for the bar fill
-          }}
+          className="h-full rounded-full bg-gradient-to-r from-lime-400 via-green-500 to-emerald-700 bg-300% animate-gradient-and-fill"
+          style={
+            {
+              // animationDelay: '0.1s', // Optional small delay for the bar fill
+            }
+          }
         ></div>
       </div>
-      <p className="mt-5 text-sm text-emerald-300">Loading your experience...</p>
+      <p className="mt-5 text-sm text-emerald-300">
+        Loading your experience...
+      </p>
     </div>
   );
 };

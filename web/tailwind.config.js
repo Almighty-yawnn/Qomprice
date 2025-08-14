@@ -1,4 +1,5 @@
 // tailwind.config.js
+// eslint-disable-next-line @typescript-eslint/no-require-imports
 const defaultTheme = require('tailwindcss/defaultTheme');
 
 /** @type {import('tailwindcss').Config} */
@@ -22,20 +23,21 @@ module.exports = {
       }, // <<--- COMMA IS ESSENTIAL HERE, if 'keyframes' follows
 
       keyframes: {
-        'gradient-flow': {
+        'gradient-flow': { // For the moving gradient effect
           '0%': { backgroundPosition: '0% 50%' },
           '50%': { backgroundPosition: '100% 50%' },
           '100%': { backgroundPosition: '0% 50%' },
         },
-        'loader-fill': {
+        'loader-fill': { // For the loader bar filling up
           '0%': { width: '0%' },
           '100%': { width: '100%' },
         }
       }, // <<--- COMMA IS ESSENTIAL HERE, if 'animation' follows
 
       animation: {
-        'gradient-flow': 'gradient-flow 4s ease infinite',
+        'gradient-flow': 'gradient-flow 4s ease infinite', // Gradient flows over 4s
         'loader-fill': 'loader-fill 1.5s ease-out forwards',
+        'gradient-and-fill': 'gradient-flow 4s ease infinite, loader-fill 1.5s ease-out forwards',
       }, // <<--- COMMA IS ESSENTIAL HERE, if 'backgroundSize' follows
 
       backgroundSize: {
@@ -45,8 +47,11 @@ module.exports = {
     },
   },
   plugins: [
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require("@tailwindcss/aspect-ratio"),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require("@tailwindcss/line-clamp"),
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
     require('@tailwindcss/typography'),
   ],
 };
