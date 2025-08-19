@@ -23,13 +23,24 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Komprice API", lifespan=lifespan)
 
+# Allow your Vercel domain + local dev
+ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "https://qomprice.com",
+    "https://*.vercel.app",   # if you also use preview URLs
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
-    allow_credentials=True,
+    allow_origins=ALLOWED_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# health check for Render
+@app.get("/healthz")
+def healthz():
+    return {"status": "ok"}
 
 # The 'get_session' function has been MOVED to app/db.py and is DELETED from this file.
 
