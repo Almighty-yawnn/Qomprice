@@ -15,7 +15,7 @@ else:
     print("DEBUG: No .env file found by find_dotenv()")
 
 # Load the environment variables
-load_dotenv(dotenv_path=dotenv_path, verbose=True, override=True)
+load_dotenv(dotenv_path=dotenv_path, verbose=True, override=False)
 DATABASE_URL = os.getenv("DATABASE_URL")
 print(f"DEBUG: DATABASE_URL with override is -> '{DATABASE_URL}'")
 
@@ -23,6 +23,7 @@ if not DATABASE_URL:
     raise ValueError("❌ DATABASE_URL not found in environment variables")
 
 print(f"DEBUG: DATABASE_URL is -> '{DATABASE_URL}'")
+
 
 metadata = MetaData()
 engine = create_async_engine(DATABASE_URL, echo=False)
