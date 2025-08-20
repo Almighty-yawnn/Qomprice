@@ -11,15 +11,19 @@ from app.api import seed as seed_module
 from sqlalchemy import select
 from app.models import Product, Category
 from fastapi.middleware.cors import CORSMiddleware
+from dotenv import load_dotenv
 
 from app.crud import list_categories
 from app.schemas import CategoryOut, MarketplaceInfo # <<< IMPORT MarketplaceInfo
 
+load_dotenv(override=False)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    async with db.engine.begin() as conn: # Use db.engine
-        await conn.run_sync(db.Base.metadata.create_all) # Use db.Base
+    # quick connection check
+    async with db.engine.begin() as conn:
+        await conn.run_sync(lambda _: None)
     yield
+    await db.engine.dispose()
 
 app = FastAPI(title="Komprice API", lifespan=lifespan)
 
