@@ -1,25 +1,26 @@
 # app/main.py
-
-from fastapi import FastAPI, Depends, HTTPException
-from typing import List
-from .db import AsyncSession # Removed AsyncSessionLocal as it's not directly used here
 from contextlib import asynccontextmanager
-from . import crud, schemas, db # <<< IMPORT 'db' TO ACCESS get_session
-from app.api import products 
+from typing import List, Optional
+
+from dotenv import load_dotenv
+from fastapi import Depends, FastAPI
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app import db, schemas
+from app.crud import list_categories
+from app.models import Product, Category
+from app.api import products
 from app.api.category_tree import router as cat_tree_router
 from app.api import seed as seed_module
-from sqlalchemy import select
-from app.models import Product, Category
-from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
 
-from app.crud import list_categories
-from app.schemas import CategoryOut, MarketplaceInfo # <<< IMPORT MarketplaceInfo
-
+# Do NOT override env coming from Render
 load_dotenv(override=False)
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # quick connection check
+    # Quick connectivity check so Render health check doesn't flap
     async with db.engine.begin() as conn:
         await conn.run_sync(lambda _: None)
     yield
@@ -27,13 +28,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(title="Komprice API", lifespan=lifespan)
 
-# Allow your Vercel domain + local dev
+# ── CORS ───────────────────────────────────────────────────────────────────────
 ALLOWED_ORIGINS = [
     "http://localhost:3000",
     "https://qomprice.com",
-    "https://*.vercel.app",   # if you also use preview URLs
+    "https://*.vercel.app",  # preview deployments
 ]
-
 app.add_middleware(
     CORSMiddleware,
     allow_origins=ALLOWED_ORIGINS,
@@ -41,20 +41,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# health check for Render
+# ── Health check for Render ────────────────────────────────────────────────────
 @app.get("/healthz")
 def healthz():
     return {"status": "ok"}
 
-# The 'get_session' function has been MOVED to app/db.py and is DELETED from this file.
-
-
-# --- /api/sites endpoint ---
+# ── Public endpoints used by your frontend ─────────────────────────────────────
 @app.get("/api/sites", response_model=List[schemas.MarketplaceInfo])
 async def get_sites_endpoint():
-    """
-    Returns a list of available marketplace sites.
-    """
+    """Returns a list of available marketplace sites."""
     return [
         {"name": "Jumia", "site_id": "jumia"},
         {"name": "Telefonika", "site_id": "telefonika"},
@@ -63,19 +58,19 @@ async def get_sites_endpoint():
         {"name": "Istari", "site_id": "istari"},
     ]
 
-
-@app.get("/categories", response_model=List[CategoryOut])
-async def categories_endpoint(session: AsyncSession = Depends(db.get_session)): # <<< UPDATED
+# Note: Your frontend calls `${API}/categories` directly (no /api prefix),
+# so keep this route at the root.
+@app.get("/categories", response_model=List[schemas.CategoryOut])
+async def categories_endpoint(session: AsyncSession = Depends(db.get_session)):
     slugs = await list_categories(session)
     return [{"slug": s} for s in slugs]
 
-
 @app.get("/search", response_model=List[schemas.ProductOut])
 async def search_endpoint(
-    q: str | None = None,
-    category: str | None = None,
+    q: Optional[str] = None,
+    category: Optional[str] = None,
     limit: int = 20,
-    session: AsyncSession = Depends(db.get_session), # <<< UPDATED
+    session: AsyncSession = Depends(db.get_session),
 ):
     stmt = select(Product)
 
@@ -91,7 +86,8 @@ async def search_endpoint(
     result = await session.execute(stmt.limit(limit))
     return result.scalars().all()
 
-
+# Routers (these expose /api/products etc.)
 app.include_router(products.router, prefix="/api")
 app.include_router(seed_module.router)
 app.include_router(cat_tree_router, prefix="/api")
+#
