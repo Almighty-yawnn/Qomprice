@@ -25,6 +25,7 @@ if not DATABASE_URL:
 
 print(f"DEBUG: DATABASE_URL is -> '{DATABASE_URL}'")
 
+
 metadata = MetaData()
 # engine = create_async_engine(DATABASE_URL, echo=False)
 def normalize_db_url():
