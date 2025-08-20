@@ -69,15 +69,19 @@ ASYNC_DATABASE_URL = build_async_url()
 metadata = MetaData()
 
 # Render Postgres requires SSL; asyncpg expects an SSLContext via connect_args.
+# Create an SSL context that does NOT verify the server cert.
 SSL_CTX = ssl.create_default_context()
+SSL_CTX.check_hostname = False
+SSL_CTX.verify_mode = ssl.CERT_NONE
 
 engine = create_async_engine(
     ASYNC_DATABASE_URL,
     pool_pre_ping=True,
     pool_size=5,
     max_overflow=10,
-    connect_args={"ssl": SSL_CTX},
+    connect_args={"ssl": SSL_CTX},  # asyncpg expects an SSLContext object
 )
+
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
