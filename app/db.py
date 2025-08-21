@@ -12,6 +12,7 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import MetaData
+from sqlalchemy import create_engine
 
 # ── .env (for local dev) — DO NOT override Render env vars ─────────────────────
 dotenv_path = find_dotenv()
