@@ -5,7 +5,3 @@ asyncpg
 alembic
 pydantic
 python-dotenv
-<<<<<<< HEAD
-=======
-psycopg2
->>>>>>> 9c62da239a4c5dc826dcca39546a2df023a41716
