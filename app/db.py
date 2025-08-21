@@ -29,7 +29,7 @@ def _redact(url: str) -> str:
         redacted = URL.create(
             drivername=u.drivername,
             username=u.username or "",
-            password="***" if u.password else None,
+            password="SW2lj9xZs85vrCIOWGLfn4MN7TBNglI6" if u.password else None,
             host=u.host,
             port=u.port,
             database=u.database,
