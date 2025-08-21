@@ -18,15 +18,15 @@ from app.api import seed as seed_module
 # Do NOT override env coming from Render
 load_dotenv(override=False)
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    # Quick connectivity check so Render health check doesn't flap
-    async with db.engine.begin() as conn:
-        await conn.run_sync(lambda _: None)
-    yield
-    await db.engine.dispose()
+# @asynccontextmanager
+# async def lifespan(app: FastAPI):
+#     # Quick connectivity check so Render health check doesn't flap
+#     async with db.engine.begin() as conn:
+#         await conn.run_sync(lambda _: None)
+#     yield
+#     await db.engine.dispose()
 
-app = FastAPI(title="Komprice API", lifespan=lifespan)
+app = FastAPI(title="Komprice API")#, lifespan=lifespan)
 
 # ── CORS ───────────────────────────────────────────────────────────────────────
 ALLOWED_ORIGINS = [
