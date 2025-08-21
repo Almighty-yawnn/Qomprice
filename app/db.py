@@ -29,7 +29,7 @@ def _redact(url: str) -> str:
         redacted = URL.create(
             drivername=u.drivername,
             username=u.username or "",
-            password="SW2lj9xZs85vrCIOWGLfn4MN7TBNglI6" if u.password else None,
+            password="***" if u.password else None,
             host=u.host,
             port=u.port,
             database=u.database,
@@ -82,6 +82,10 @@ engine = create_async_engine(
     connect_args={"ssl": SSL_CTX},  # asyncpg expects an SSLContext object
 )
 
+engines = create_engine("postgresql://komprice_postgres_user:SW2lj9xZs85vrCIOWGLfn4MN7TBNglI6@dpg-d2ieqe0dl3ps73ccpeg0-a.oregon-postgres.render.com/komprice_postgres")
+with engines.connect() as conn:
+    result = conn.execute("SELECT 1")
+    print(result.scalar())  # should print 1 if connected successfully
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
