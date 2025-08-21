@@ -12,17 +12,17 @@ from sqlalchemy.ext.asyncio import (
 )
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import MetaData
-from sqlalchemy import create_engine
 
-# ── .env (for local dev) — Render injects envs, so don't override ──────────────
+# ── .env (for local dev) — DO NOT override Render env vars ─────────────────────
 dotenv_path = find_dotenv()
 if dotenv_path:
     print(f"DEBUG: Found .env file at: {dotenv_path}")
 else:
     print("DEBUG: No .env file found by find_dotenv()")
+
 load_dotenv(dotenv_path=dotenv_path, verbose=True, override=False)
 
-# ── Helpers to log URLs safely and rebuild async URL ───────────────────────────
+# ── Build an asyncpg URL from whatever DATABASE_URL we get ─────────────────────
 def _redact(url: str) -> str:
     try:
         u = make_url(url)
@@ -47,15 +47,18 @@ def build_async_url() -> str:
 
     u = make_url(raw)
 
-    # Force async driver
+    # Always use the async driver explicitly.
+    driver = "postgresql+asyncpg"
+
+    # Re-create URL cleanly (drop query params like sslmode, which asyncpg doesn't use)
     rebuilt = URL.create(
-        drivername="postgresql+asyncpg",
+        drivername=driver,
         username=u.username,
         password=u.password,
         host=u.host,
         port=u.port or 5432,
         database=u.database,
-        query={},  # drop query params (sslmode etc) — we pass SSL via connect_args
+        query={},  # <- drop sslmode and others; we'll pass SSL via connect_args
     )
     print(f"DEBUG: DATABASE_URL (async) -> '{_redact(str(rebuilt))}'")
     return str(rebuilt)
@@ -65,20 +68,20 @@ ASYNC_DATABASE_URL = build_async_url()
 # ── SQLAlchemy async engine/session ─────────────────────────────────────────────
 metadata = MetaData()
 
-# Render Postgres requires TLS; asyncpg accepts an SSLContext via connect_args.
+# Render Postgres requires SSL; asyncpg expects an SSLContext via connect_args.
+# Create an SSL context that does NOT verify the server cert.
 SSL_CTX = ssl.create_default_context()
-# If you want strict verification, keep defaults.
-# If your DB had a self-signed cert, you would relax it like this:
-# SSL_CTX.check_hostname = False
-# SSL_CTX.verify_mode = ssl.CERT_NONE
+SSL_CTX.check_hostname = False
+SSL_CTX.verify_mode = ssl.CERT_NONE
 
 engine = create_async_engine(
     ASYNC_DATABASE_URL,
     pool_pre_ping=True,
     pool_size=5,
     max_overflow=10,
-    connect_args={"ssl": SSL_CTX},  # asyncpg expects an SSLContext
+    connect_args={"ssl": SSL_CTX},  # asyncpg expects an SSLContext object
 )
+
 
 AsyncSessionLocal = async_sessionmaker(
     bind=engine,
@@ -90,5 +93,6 @@ class Base(DeclarativeBase):
     pass
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:
+    """FastAPI dependency to provide a new async session per request."""
     async with AsyncSessionLocal() as session:
         yield session
