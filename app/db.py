@@ -46,6 +46,8 @@ def build_async_url() -> str:
         raise RuntimeError("❌ DATABASE_URL is not set")
 
     u = make_url(raw)
+    print(u)
+    print(u.username, u.password, u.host, u.port, u.database)
 
     # Always use the async driver explicitly.
     driver = "postgresql+asyncpg"
