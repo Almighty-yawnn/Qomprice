@@ -1,7 +1,7 @@
 # selectors/jumia.yaml
 phones-tablets:
   url: "https://store.shaqexpress.com/categories?cid=7-phones-and-tablets"
-  item:  "div.splide__slide.relative.rounded-lg.px-2.py-2.pb-3.5.border"                                # product card container
+  item:  "div.splide__slide.relative.rounded-lg.px-2.py-2"                                # product card container
   link:  "a"                                               # product link (relative URL)
   img:   "a div.flex div.relative div.overflow-hidden img"         # product image inside link
   title: "a p.truncate.text-base.font-medium.text-[#5F6368]"                  # product title/name

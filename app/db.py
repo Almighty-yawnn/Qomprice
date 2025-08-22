@@ -26,36 +26,10 @@ if not DATABASE_URL:
 print(f"DEBUG: DATABASE_URL is -> '{DATABASE_URL}'")
 
 metadata = MetaData()
-engine = create_async_engine(DATABASE_URL, echo=False)
-# def normalize_db_url():
-#     raw = os.getenv("DATABASE_URL")
-#     if not raw:
-#         raise RuntimeError("DATABASE_URL is not set")
-
-#     url = make_url(raw)
-
-#     # force async driver
-#     drv = url.drivername.lower().replace("postgres", "postgresql")
-#     if not drv.endswith("+asyncpg"):
-#         drv = "postgresql+asyncpg"
-
-#     # rebuild without any unsupported query params (e.g., sslmode)
-#     return str(URL.create(
-#         drivername=drv,
-#         username=url.username,
-#         password=url.password,
-#         host=url.host,
-#         port=url.port or 5432,
-#         database=url.database,
-#         query={},  # drop sslmode or other params
-#     ))
-
-# ASYNC_DATABASE_URL = normalize_db_url()
-
 # # Render’s Postgres requires SSL — asyncpg expects ssl=...
-# SSL_CONTEXT = ssl.create_default_context()
-# SSL_CTX.check_hostname = False
-# SSL_CTX.verify_mode = ssl.CERT_NONE
+SSL_CTX = ssl.create_default_context()
+SSL_CTX.check_hostname = False
+SSL_CTX.verify_mode = ssl.CERT_NONE
 
 # engine = create_async_engine(
 #     ASYNC_DATABASE_URL,
@@ -63,8 +37,13 @@ engine = create_async_engine(DATABASE_URL, echo=False)
 #     pool_size=5,
 #     max_overflow=10,
 #     connect_args={"ssl": SSL_CONTEXT},   # <-- correct for asyncpg
-#)
-# AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=False,
+    connect_args={"ssl": SSL_CTX}, 
+)
+# engine = create_async_engine(DATABASE_URL, echo=False)
+
 AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 class Base(DeclarativeBase):
