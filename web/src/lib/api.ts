@@ -8,7 +8,7 @@ interface MarketplaceInfo {
   name: string;
 }
 
-export const API = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+export const API = process.env.NEXT_PUBLIC_API_URL ?? "https://komprice-production.up.railway.app";
 
 // Corrected fetchCategories
 // Explicitly declare the return type for clarity and to help TypeScript.
