@@ -1,4 +1,16 @@
 {
+  "name": "qomprice",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "cd web && pnpm dev",
+    "build": "cd web && pnpm install && pnpm build",
+    "start": "cd web && pnpm start",
+    "lint": "cd web && pnpm lint"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@headlessui/react": "^2.2.4",
     "@heroicons/react": "^2.2.0",
