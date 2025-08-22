@@ -1,78 +1,77 @@
 # app/db.py
-import os
-import ssl
-from typing import AsyncGenerator
 
-from dotenv import load_dotenv, find_dotenv
-from sqlalchemy.engine.url import make_url, URL
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
 from sqlalchemy.orm import DeclarativeBase
 from sqlalchemy import MetaData
+from dotenv import load_dotenv, find_dotenv
+import os, ssl
+from sqlalchemy.engine.url import make_url, URL
+from typing import AsyncGenerator # <<< 1. IMPORT AsyncGenerator
 
-# Load local .env for dev only; don't override Render/Railway env
+# Try to find the .env file first and print its path
 dotenv_path = find_dotenv()
-load_dotenv(dotenv_path=dotenv_path, verbose=False, override=False)
+if dotenv_path:
+    print(f"DEBUG: Found .env file at: {dotenv_path}")
+else:
+    print("DEBUG: No .env file found by find_dotenv()")
 
-def _redact(url: str) -> str:
-    try:
-        u = make_url(url)
-        return str(
-            URL.create(
-                drivername=u.drivername,
-                username=u.username or "",
-                password="***" if u.password else None,
-                host=u.host,
-                port=u.port,
-                database=u.database,
-                query=u.query,
-            )
-        )
-    except Exception:
-        return url
+# Load the environment variables
+load_dotenv(dotenv_path=dotenv_path, verbose=True, override=False)
+DATABASE_URL = os.getenv("DATABASE_URL")
+print(f"DEBUG: DATABASE_URL with override is -> '{DATABASE_URL}'")
 
-def build_async_url() -> str:
-    raw = os.getenv("DATABASE_URL")
-    print(f"DEBUG: DATABASE_URL (raw) -> '{_redact(raw or '')}'")
-    if not raw:
-        raise RuntimeError("❌ DATABASE_URL is not set")
+if not DATABASE_URL:
+    raise ValueError("❌ DATABASE_URL not found in environment variables")
 
-    u = make_url(raw)
-
-    # Always use async driver
-    rebuilt = URL.create(
-        drivername="postgresql+asyncpg",
-        username=u.username,
-        password=u.password,
-        host=u.host,
-        port=u.port or 5432,
-        database=u.database,
-        query={},  # drop sslmode etc.; we pass SSL via connect_args
-    )
-    print(f"DEBUG: DATABASE_URL (async) -> '{_redact(str(rebuilt))}'")
-    return str(rebuilt)
-
-ASYNC_DATABASE_URL = build_async_url()
+print(f"DEBUG: DATABASE_URL is -> '{DATABASE_URL}'")
 
 metadata = MetaData()
+engine = create_async_engine(DATABASE_URL, echo=False)
+# def normalize_db_url():
+#     raw = os.getenv("DATABASE_URL")
+#     if not raw:
+#         raise RuntimeError("DATABASE_URL is not set")
 
-# SSL for Render/Railway (works with asyncpg)
-SSL_CTX = ssl.create_default_context()
-SSL_CTX.check_hostname = False
-SSL_CTX.verify_mode = ssl.CERT_NONE
+#     url = make_url(raw)
 
-engine = create_async_engine(
-    ASYNC_DATABASE_URL,
-    pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
-    connect_args={"ssl": SSL_CTX},
-)
+#     # force async driver
+#     drv = url.drivername.lower().replace("postgres", "postgresql")
+#     if not drv.endswith("+asyncpg"):
+#         drv = "postgresql+asyncpg"
 
-AsyncSessionLocal = async_sessionmaker(bind=engine, class_=AsyncSession, expire_on_commit=False)
+#     # rebuild without any unsupported query params (e.g., sslmode)
+#     return str(URL.create(
+#         drivername=drv,
+#         username=url.username,
+#         password=url.password,
+#         host=url.host,
+#         port=url.port or 5432,
+#         database=url.database,
+#         query={},  # drop sslmode or other params
+#     ))
+
+# ASYNC_DATABASE_URL = normalize_db_url()
+
+# # Render’s Postgres requires SSL — asyncpg expects ssl=...
+# SSL_CONTEXT = ssl.create_default_context()
+# SSL_CTX.check_hostname = False
+# SSL_CTX.verify_mode = ssl.CERT_NONE
+
+# engine = create_async_engine(
+#     ASYNC_DATABASE_URL,
+#     pool_pre_ping=True,
+#     pool_size=5,
+#     max_overflow=10,
+#     connect_args={"ssl": SSL_CONTEXT},   # <-- correct for asyncpg
+#)
+# AsyncSessionLocal = async_sessionmaker(engine, expire_on_commit=False)
+AsyncSessionLocal = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
 
 class Base(DeclarativeBase):
     pass
 
-async def get_session() -> AsyncGenerator[AsyncSession, None]:
+
+async def get_session() -> AsyncGenerator[AsyncSession, None]: # <<< 2. UPDATE THE TYPE HINT
+    """Dependency to get a new database session for each request."""
     async with AsyncSessionLocal() as session:
         yield session
